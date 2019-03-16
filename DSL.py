@@ -40,13 +40,21 @@ facts = [
 ]
 
 
+# List of missing facts
+missing_info = []
+
+
 # Gets the value for a fact
 def fact(name, subj, obj = None):
     lookup = list(filter(lambda x: x.name == name and x.subject == subj and x.object == obj, facts))
     if lookup == []:
+        missing_info.append([name, subj, obj])
         return None
     else:
         return lookup[0].value
+
+def delete_duplicates(x):
+  return list(dict.fromkeys(x))
 
 
 # USAGE
@@ -60,3 +68,10 @@ print(fact("relationship","jim","jane"))
 # Invoking rules
 print(age("jim"))
 print(is_qualifying_relative("jim","jane"))
+
+# Getting a list of missing information
+missing_info = []
+relationship("jim","art") == "Siblings" and gender("jim") == 'Female'
+print(missing_info)
+
+
