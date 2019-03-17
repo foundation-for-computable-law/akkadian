@@ -13,6 +13,13 @@ class Fact:
         self.value = value
 
 
+
+
+
+# Data structures
+facts = []
+missing_info = []
+
 # List of asserted facts (with mock values)
 facts = [
     Fact("age", "jim", None, 8),
@@ -22,19 +29,14 @@ facts = [
     Fact("relationship", "jim", "jane", "Parent")
 ]
 
-
-# List of missing facts
-missing_info = []
-
-
 # Gets the value for a fact
 def fact(name, subj, obj = None):
     lookup = list(filter(lambda x: x.name == name and x.subject == subj and x.object == obj, facts))
     if lookup == []:
         missing_info.append([name, subj, obj])
-        return None
+        return T(None)
     else:
-        return lookup[0].value
+        return T(lookup[0].value)
 
 def delete_duplicates(x):
   return list(dict.fromkeys(x))
@@ -86,14 +88,26 @@ class T:
         return self.value / o.value
 
     # Comparison...
-    def __lt__(self, o): 
-        return self.value <= o.value
+    def __lt__(self, o):
+        if type(self) is T and type(o) is T:
+            return self.value < o.value
+        elif type(self) is T:
+            return self.value < o
+        else:
+            return self < o.value
 
     def __le__(self, o): 
-        return self.value / o.value
+        if self == T(None) or o == T(None):
+            return T(None)
+        elif type(self) is T and type(o) is T:
+            return self.value <= o.value
+        elif type(self) is T:
+            return self.value <= o
+        else:
+            return self.value <= o.value
 
     def __eq__(self, o): 
-        return self.value == o.value
+        return T(self.value == o.value)
 
     def __ne__(self, o): 
         return self.value != o.value
@@ -102,7 +116,14 @@ class T:
         return self.value > o.value
 
     def __ge__(self, o): 
-        return self.value >= o.value
+        if self == T(None) or o == T(None):
+            return T(None)
+        elif type(self) is T and type(o) is T:
+            return self.value >= o.value
+        elif type(self) is T:
+            return self.value >= o
+        else:
+            return self.value >= o.value
 
     # TODO: Add list operators
 

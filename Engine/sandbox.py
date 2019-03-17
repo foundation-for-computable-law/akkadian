@@ -1,15 +1,16 @@
 from dsl import *
 
 
-# RULEBASE
+# RULES
 
 # Substantive rules
 
 def is_qualifying_relative(a, b): return (
-    age(a) < 18 &
-    age(b) >= 18 &
-    gender(b) == 'Female' &
-    ~ relationship(a, b) == "Child")
+    #age(a) < 18 &
+    age(b) >= 18 
+    #gender(b) == 'Female' &
+    #~ relationship(a, b) == "Child"
+    )
 
 
 # Base-level facts from the rules
@@ -19,21 +20,25 @@ def gender(p): return fact("gender", p)
 def relationship(a, b): return fact("relationship", a, b)
 
 
+# FACTS
+
+
+
+
 # USAGE
 
 
 # Getting the value of a fact
-print(fact("gender","jim"))
-print(fact("citizenship","jim"))
-print(fact("relationship","jim","jane"))
+print(fact("gender","jim").value)
+print(fact("citizenship","jim").value)
+print(fact("relationship","jim","jane").value)
 
 # Invoking rules
-print(age("jim"))
-print(is_qualifying_relative("jim","jane"))
+print(age("jim").value)
+print(is_qualifying_relative("jim","jane").value)
 
 # Getting a list of missing information
 missing_info = []
 relationship("jim","art") == "Siblings" and gender("jim") == 'Female'
 print(missing_info)
 
-print(T(234)+T(1243124))
