@@ -15,8 +15,7 @@ class Fact:
         self.value = value
 
 
-# Data structures
-facts = []
+# List of missing facts
 missing_info = []
 
 
@@ -38,21 +37,6 @@ def fact(name, subj, obj = None):
         return T(None)
     else:
         return T(lookup[0].value)
-
-def delete_duplicates(x):
-  return list(dict.fromkeys(x))
-
-
-def t_with_val(o, v):
-    type(o) is T and o.value == v
-
-
-def t_with_val2(o, v):
-    type(o) is T
-
-    
-def raw_val(o, v):
-    (not type(o) is T) and o == v
 
 
 # T OBJECTS
