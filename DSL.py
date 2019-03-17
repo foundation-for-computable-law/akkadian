@@ -57,6 +57,56 @@ def delete_duplicates(x):
   return list(dict.fromkeys(x))
 
 
+# T OBJECTS
+# Eventually, these will be temporal objects
+
+class T: 
+    def __init__(self, value): 
+        self.value = value
+  
+    # overloading binary operators  
+    def __and__(self, o): 
+        return self.value and o.value
+
+    def __or__(self, o): 
+        return self.value or o.value
+
+    def __neg__(self): 
+        return not self.value
+
+    def __add__(self, o): 
+        return self.value + o.value
+    
+    def __mul__(self, o): 
+        return self.value * o.value
+
+    def __sub__(self, o): 
+        return self.value - o.value
+
+    def __truediv__(self, o): 
+        return self.value / o.value
+
+    def __lt__(self, o): 
+        return self.value <= o.value
+
+    def __le__(self, o): 
+        return self.value / o.value
+
+    def __eq__(self, o): 
+        return self.value == o.value
+
+    def __ne__(self, o): 
+        return self.value != o.value
+
+    def __gt__(self, o): 
+        return self.value > o.value
+
+    def __ge__(self, o): 
+        return self.value >= o.value
+
+    # TODO: Add list operators
+
+
 # USAGE
 
 
@@ -74,4 +124,5 @@ missing_info = []
 relationship("jim","art") == "Siblings" and gender("jim") == 'Female'
 print(missing_info)
 
+print(T(234)+T(1243124))
 
