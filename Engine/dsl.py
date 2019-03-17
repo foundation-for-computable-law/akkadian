@@ -1,3 +1,5 @@
+import operator
+
 
 # FACTS - MACHINERY
 
@@ -13,12 +15,10 @@ class Fact:
         self.value = value
 
 
-
-
-
 # Data structures
 facts = []
 missing_info = []
+
 
 # List of asserted facts (with mock values)
 facts = [
@@ -28,6 +28,7 @@ facts = [
     Fact("gender", "jane", None, "Female"),
     Fact("relationship", "jim", "jane", "Parent")
 ]
+
 
 # Gets the value for a fact
 def fact(name, subj, obj = None):
@@ -89,43 +90,37 @@ class T:
 
     # Comparison...
     def __lt__(self, o):
-        if type(self) is T and type(o) is T:
-            return self.value < o.value
-        elif type(self) is T:
-            return self.value < o
-        else:
-            return self < o.value
+        return process_binary(operator.lt, self, o)
 
     def __le__(self, o): 
-        if self == T(None) or o == T(None):
-            return T(None)
-        elif type(self) is T and type(o) is T:
-            return self.value <= o.value
-        elif type(self) is T:
-            return self.value <= o
-        else:
-            return self.value <= o.value
+        return process_binary(operator.le, self, o)
 
-    def __eq__(self, o): 
+    def __eq__(self, o):
+        # TODO: Handle various object types
+        # Using process_binary causes recursion error
         return T(self.value == o.value)
 
     def __ne__(self, o): 
-        return self.value != o.value
+        return process_binary(operator.ne, self, o)
 
     def __gt__(self, o): 
-        return self.value > o.value
+        return process_binary(operator.gt, self, o)
 
     def __ge__(self, o): 
-        if self == T(None) or o == T(None):
-            return T(None)
-        elif type(self) is T and type(o) is T:
-            return self.value >= o.value
-        elif type(self) is T:
-            return self.value >= o
-        else:
-            return self.value >= o.value
+        return process_binary(operator.ge, self, o)
 
     # TODO: Add list operators
 
 
+# Internal processing of binary operators
+def process_binary(f, a, b):
+    if a == T(None) or b == T(None):
+        return T(None)
+    elif type(a) is T and type(b) is T:
+        return f(a.value, b.value)
+    elif type(a) is T:
+        return f(a.value, b)
+    else:
+        return f(a.value, b.value)
 
+#__process_binary = process_binary   # (tries to) make the method private

@@ -37,6 +37,7 @@ class TestDSL(unittest.TestCase):
 
     def test_ge(self):
         self.assertEqual(T(99) >= T(70), T(True))
+        self.assertEqual(T(70) >= T(70), T(True))
         self.assertEqual(T(99) >= T(170), T(False))
         self.assertEqual(T(99.023) >= T(170), T(False))
         self.assertEqual(T(99) >= 70, T(True))
