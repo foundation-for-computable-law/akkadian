@@ -47,16 +47,32 @@ class T:
     def __init__(self, value): 
         self.value = value
   
-    # overloading binary operators  
-    def __and__(self, o): 
-        return self.value and o.value
+    # &
+    def __and__(self, o):
+        if self.value == False or o.value == False:
+            return T(False)
+        elif self.value == None or o.value == None:
+            return T(None)
+        else:
+            return T(True)
 
+    # |
     def __or__(self, o): 
-        return self.value or o.value
+        if self.value == True or o.value == True:
+            return T(True)
+        elif self.value == None or o.value == None:
+            return T(None)
+        else:
+            return T(False)
 
-    def __neg__(self): 
-        return not self.value
+    # ~
+    def __invert__(self):
+        if self.value == None:
+            return T(None)
+        else:
+            return T(not self.value)
 
+    # Arithmetic...
     def __add__(self, o): 
         return self.value + o.value
     
@@ -69,6 +85,7 @@ class T:
     def __truediv__(self, o): 
         return self.value / o.value
 
+    # Comparison...
     def __lt__(self, o): 
         return self.value <= o.value
 

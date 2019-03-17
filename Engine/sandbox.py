@@ -6,10 +6,10 @@ from dsl import *
 # Substantive rules
 
 def is_qualifying_relative(a, b): return (
-    age(a) < 18 and
-    age(b) >= 18 and
-    gender(b) == 'Female' and
-    not relationship(a, b) == "Child")
+    age(a) < 18 &
+    age(b) >= 18 &
+    gender(b) == 'Female' &
+    ~ relationship(a, b) == "Child")
 
 
 # Base-level facts from the rules
