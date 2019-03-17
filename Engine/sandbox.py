@@ -6,10 +6,10 @@ from dsl import *
 # Substantive rules
 
 def is_qualifying_relative(a, b): return (
-    #age(a) < 18 &
-    age(b) >= 18 
-    #gender(b) == 'Female' &
-    #~ relationship(a, b) == "Child"
+    age(a) < 18 &
+    age(b) >= 18 &
+    gender(b) == 'Female' &
+    ~ relationship(a, b) == "Child"
     )
 
 
@@ -30,15 +30,11 @@ def relationship(a, b): return fact("relationship", a, b)
 
 # Getting the value of a fact
 print(fact("gender","jim").value)
-print(fact("citizenship","jim").value)
 print(fact("relationship","jim","jane").value)
 
 # Invoking rules
-print(age("jim").value)
 print(is_qualifying_relative("jim","jane").value)
 
 # Getting a list of missing information
-missing_info = []
-relationship("jim","art") == "Siblings" and gender("jim") == 'Female'
 print(missing_info)
 

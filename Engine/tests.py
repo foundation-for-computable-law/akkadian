@@ -16,6 +16,10 @@ class TestDSL(unittest.TestCase):
         self.assertEqual((T(False) & T(None)).value, False)
         self.assertEqual((T(True) & T(None)).value, None)
         self.assertEqual((T(None) & T(None)).value, None)
+        self.assertEqual((T(True) & True).value, True)
+        self.assertEqual((True & T(True)).value, True)
+        self.assertEqual((False & T(True)).value, False)
+        self.assertEqual((False & T(None)).value, False)
 
 
     def test_or(self):
@@ -28,6 +32,11 @@ class TestDSL(unittest.TestCase):
         self.assertEqual((T(False) | T(None)).value, None)
         self.assertEqual((T(True) | T(None)).value, True)
         self.assertEqual((T(None) | T(None)).value, None)
+        self.assertEqual((True | T(True)).value, True)
+        self.assertEqual((False | T(True)).value, True)
+        self.assertEqual((False | T(None)).value, None)
+        self.assertEqual((True | T(None)).value, True)
+        self.assertEqual((True | T(False)).value, True)
 
 
     def test_not(self):
