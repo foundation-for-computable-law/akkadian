@@ -77,17 +77,29 @@ class T:
 
     # Arithmetic...
     def __add__(self, o): 
-        return self.value + o.value
+        return process_binary(operator.add, self, o)
+
+    def __radd__(self, o): 
+        return process_binary(operator.add, self, o)
     
     def __mul__(self, o): 
-        return self.value * o.value
+        return process_binary(operator.mul, self, o)
 
+    def __rmul__(self, o): 
+        return process_binary(operator.mul, self, o)
+    
     def __sub__(self, o): 
-        return self.value - o.value
+        return process_binary(operator.sub, self, o)
 
+    def __rsub__(self, o): 
+        return process_binary(operator.sub, o, self)
+    
     def __truediv__(self, o): 
-        return self.value / o.value
+        return process_binary(operator.truediv, self, o)
 
+    def __rtruediv__(self, o): 
+        return process_binary(operator.truediv, o, self)
+    
     # Comparison...
     def __lt__(self, o):
         return process_binary(operator.lt, self, o)
@@ -112,6 +124,7 @@ class T:
 
 
 # Internal processing of binary operators
+# TODO: Make this a private method, if possible
 def process_binary(f, a, b):
     if is_none(a) or is_none(b):
         return T(None)
@@ -120,7 +133,7 @@ def process_binary(f, a, b):
     elif type(a) is T:
         return T(f(a.value, b))
     else:
-        return T(f(a.value, b.value))
+        return T(f(a, b.value))
 
 
 def is_none(a):
