@@ -5,49 +5,125 @@ from dsl import *
 
 class TestDSL(unittest.TestCase):
 
+
     def test_and(self):
-        self.assertEqual(T(True) & T(False), T(False))
-        self.assertEqual(T(True) & T(True), T(True))
-        self.assertEqual(T(False) & T(False), T(False))
-        self.assertEqual(T(False) & T(True), T(False))
-        self.assertEqual(T(None) & T(True), T(None))
-        self.assertEqual(T(None) & T(False), T(False))
-        self.assertEqual(T(False) & T(None), T(False))
-        self.assertEqual(T(True) & T(None), T(None))
-        self.assertEqual(T(None) & T(None), T(None))
+        self.assertEqual((T(True) & T(False)).value, False)
+        self.assertEqual((T(True) & T(True)).value, True)
+        self.assertEqual((T(False) & T(False)).value, False)
+        self.assertEqual((T(False) & T(True)).value, False)
+        self.assertEqual((T(None) & T(True)).value, None)
+        self.assertEqual((T(None) & T(False)).value, False)
+        self.assertEqual((T(False) & T(None)).value, False)
+        self.assertEqual((T(True) & T(None)).value, None)
+        self.assertEqual((T(None) & T(None)).value, None)
 
 
     def test_or(self):
-        self.assertEqual(T(True) | T(False), T(True))
-        self.assertEqual(T(True) | T(True), T(True))
-        self.assertEqual(T(False) | T(False), T(False))
-        self.assertEqual(T(False) | T(True), T(True))
-        self.assertEqual(T(None) | T(True), T(True))
-        self.assertEqual(T(None) | T(False), T(None))
-        self.assertEqual(T(False) | T(None), T(None))
-        self.assertEqual(T(True) | T(None), T(True))
-        self.assertEqual(T(None) | T(None), T(None))
+        self.assertEqual((T(True) | T(False)).value, True)
+        self.assertEqual((T(True) | T(True)).value, True)
+        self.assertEqual((T(False) | T(False)).value, False)
+        self.assertEqual((T(False) | T(True)).value, True)
+        self.assertEqual((T(None) | T(True)).value, True)
+        self.assertEqual((T(None) | T(False)).value, None)
+        self.assertEqual((T(False) | T(None)).value, None)
+        self.assertEqual((T(True) | T(None)).value, True)
+        self.assertEqual((T(None) | T(None)).value, None)
 
-        
+
     def test_not(self):
-        self.assertEqual(~T(True), T(False))
-        self.assertEqual(~T(False), T(True))
-        self.assertEqual(~T(None), T(None))
+        self.assertEqual((~T(True)).value, False)
+        self.assertEqual((~T(False)).value, True)
+        self.assertEqual((~T(None)).value, None)
 
 
     def test_ge(self):
-        self.assertEqual(T(99) >= T(70), T(True))
-        self.assertEqual(T(70) >= T(70), T(True))
-        self.assertEqual(T(99) >= T(170), T(False))
-        self.assertEqual(T(99.023) >= T(170), T(False))
-        self.assertEqual(T(99) >= 70, T(True))
-        self.assertEqual(354 >= T(70), T(True))
-        self.assertEqual(354 >= T(670), T(False))
-        self.assertEqual(354 >= T(None), T(None))
-        self.assertEqual(T(None) >= 34, T(None))
-        self.assertEqual(T(None) >= T(None), T(None))
+        self.assertEqual((T(99) >= T(70)).value, True)
+        self.assertEqual((T(70) >= T(70)).value, True)
+        self.assertEqual((T(99) >= T(170)).value, False)
+        self.assertEqual((T(99.023) >= T(170)).value, False)
+        self.assertEqual((T(99) >= 70).value, True)
+        self.assertEqual((354 >= T(70)).value, True)
+        self.assertEqual((354 >= T(670)).value, False)
+        self.assertEqual((354 >= T(None)).value, None)
+        self.assertEqual((T(None) >= 34).value, None)
+        self.assertEqual((T(None) >= T(None)).value, None)
 
 
+    def test_gt(self):
+        self.assertEqual((T(99) > T(70)).value, True)
+        self.assertEqual((T(70) > T(70)).value, False)
+        self.assertEqual((T(99) > T(170)).value, False)
+        self.assertEqual((T(99.023) > T(170)).value, False)
+        self.assertEqual((T(99) > 70).value, True)
+        self.assertEqual((354 > T(70)).value, True)
+        self.assertEqual((354 > T(670)).value, False)
+        self.assertEqual((354 > T(None)).value, None)
+        self.assertEqual((T(None) > 34).value, None)
+        self.assertEqual((T(None) > T(None)).value, None)
+
+
+    def test_le(self):
+        self.assertEqual((T(99) <= T(70)).value, False)
+        self.assertEqual((T(70) <= T(70)).value, True)
+        self.assertEqual((T(99) <= T(170)).value, True)
+        self.assertEqual((T(99.023) <= T(170)).value, True)
+        self.assertEqual((T(99) <= 70).value, False)
+        self.assertEqual((354 <= T(70)).value, False)
+        self.assertEqual((354 <= T(670)).value, True)
+        self.assertEqual((354 <= T(None)).value, None)
+        self.assertEqual((T(None) <= 34).value, None)
+        self.assertEqual((T(None) <= T(None)).value, None)
+
+
+    def test_lt(self):
+        self.assertEqual((T(99) < T(70)).value, False)
+        self.assertEqual((T(70) < T(70)).value, False)
+        self.assertEqual((T(99) < T(170)).value, True)
+        self.assertEqual((T(99.023) < T(170)).value, True)
+        self.assertEqual((T(99) < 70).value, False)
+        self.assertEqual((354 < T(70)).value, False)
+        self.assertEqual((354 < T(670)).value, True)
+        self.assertEqual((354 < T(None)).value, None)
+        self.assertEqual((T(None) < 34).value, None)
+        self.assertEqual((T(None) < T(None)).value, None)
+
+
+    def test_eq(self):
+        self.assertEqual((T(99) == T(70)).value, False)
+        self.assertEqual((T(70) == T(70)).value, True)
+        self.assertEqual((T(99) == 70).value, False)
+        self.assertEqual((354 == T(70)).value, False)
+        self.assertEqual((354 == T(354)).value, True)
+        self.assertEqual((354 == T(None)).value, None)
+        self.assertEqual((T(None) == 34).value, None)
+        self.assertEqual((T(None) == T(None)).value, None)
+        self.assertEqual((T("hello") == T("hello")).value, True)
+        self.assertEqual((T("hello") == T("meow")).value, False)
+        self.assertEqual((T(None) == T("meow")).value, None)
+        self.assertEqual((T("hello") == T(None)).value, None)
+
+
+    def test_ne(self):
+        self.assertEqual((T(99) != T(70)).value, True)
+        self.assertEqual((T(70) != T(70)).value, False)
+        self.assertEqual((T(99) != 70).value, True)
+        self.assertEqual((354 != T(70)).value, True)
+        self.assertEqual((354 != T(354)).value, False)
+        self.assertEqual((354 != T(None)).value, None)
+        self.assertEqual((T(None) != 34).value, None)
+        self.assertEqual((T(None) != T(None)).value, None)
+        self.assertEqual((T("hello") != T("hello")).value, False)
+        self.assertEqual((T("hello") != T("meow")).value, True)
+        self.assertEqual((T(None) != T("meow")).value, None)
+        self.assertEqual((T("hello") != T(None)).value, None)
+
+
+    def test_is_none(self):
+        self.assertEqual(is_none(9), False)
+        self.assertEqual(is_none(T(9)), False)
+        self.assertEqual(is_none(T(True)), False)
+        self.assertEqual(is_none(T(None)), True)
+        
 
 if __name__ == '__main__':
     unittest.main()

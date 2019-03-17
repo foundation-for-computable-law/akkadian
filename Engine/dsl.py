@@ -96,12 +96,11 @@ class T:
         return process_binary(operator.le, self, o)
 
     def __eq__(self, o):
-        # TODO: Handle various object types
-        # Using process_binary causes recursion error
-        return T(self.value == o.value)
+        # Hacking equality == playing with fire
+         return process_binary(operator.eq, self, o)
 
     def __ne__(self, o): 
-        return process_binary(operator.ne, self, o)
+        return ~ (self == o)
 
     def __gt__(self, o): 
         return process_binary(operator.gt, self, o)
@@ -114,13 +113,16 @@ class T:
 
 # Internal processing of binary operators
 def process_binary(f, a, b):
-    if a == T(None) or b == T(None):
+    if is_none(a) or is_none(b):
         return T(None)
     elif type(a) is T and type(b) is T:
-        return f(a.value, b.value)
+        return T(f(a.value, b.value))
     elif type(a) is T:
-        return f(a.value, b)
+        return T(f(a.value, b))
     else:
-        return f(a.value, b.value)
+        return T(f(a.value, b.value))
 
-#__process_binary = process_binary   # (tries to) make the method private
+
+def is_none(a):
+    return type(a) is T and a.value == None
+
