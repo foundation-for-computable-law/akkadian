@@ -7,7 +7,7 @@ from dsl import *
 
 def is_qualifying_relative(a, b): return (
     age(a) < 18 &
-    age(b) >= 18 &
+    age(a) >= 18 &
     gender(b) == 'Female' &
     ~ relationship(a, b) == "Child"
     )
@@ -22,7 +22,7 @@ def relationship(a, b): return fact("relationship", a, b)
 
 # FACTS
 
-# print(facts)
+
 
 
 # USAGE
@@ -34,10 +34,9 @@ def relationship(a, b): return fact("relationship", a, b)
 
 # Invoking rules
 #is_qualifying_relative("jim","jane").value
-#print(missing_info)
-
-# Getting a list of missing information
-print(get_missing_data('sandbox.is_qualifying_relative("jim","jone")', "sandbox", []))
 
 
-
+# Apply the rules to a fact pattern
+# apply_rules('sandbox.is_qualifying_relative("jim","jone")',
+#             [Fact("age", "jim", None, 88),
+#              Fact("gender","jone",None,"Female")]))

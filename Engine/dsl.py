@@ -19,32 +19,33 @@ class Fact:
 missing_info = []
 
 
-# List of asserted facts (with mock values)
-facts = [
-    Fact("age", "jim", None, 88),
-    Fact("age", "jane", None, 92),
-    #Fact("gender", "jim", None, "Male"),
-    #Fact("gender", "jane", None, "Female"),
-    #Fact("relationship", "jim", "jane", "Parent")
-]
+# List of asserted facts
+facts = []
 
 
-# Generates a list of facts needed to resolve a goal
+# Applies substantive rules to a fact pattern
 # The goal is entered as a string, for example: "module.fcn('jim')"
-def get_missing_data(goal, module, fs):
-    #eval("import " + module")
-    import sandbox
+def apply_rules(goal, fs):
+    exec("import " + goal[0:goal.find('.')]) # Note: causes the imported module to be reevaluated
     missing_info.clear()
-    facts = fs
-    eval(goal) 
-    return missing_info # not working b/c missing facts are not being added to the "facts" list
+    for item in fs:
+        facts.append(item)
+    result = eval(goal)
+    progress = len(facts) / max(len(facts) + len(missing_info), 1)
+    return {
+        "result": result.pretty(),
+        "missing_info": missing_info,
+        "progress" : round(progress, 2)
+        }
 
 
 # Gets the value for a fact
 def fact(name, subj, obj = None):
     lookup = list(filter(lambda x: x.name == name and x.subject == subj and x.object == obj, facts))
     if lookup == []:
-        missing_info.append([name, subj, obj]) # TODO: prevent duplicates from being added
+        # Prevent duplicates from being added
+        if list(filter(lambda x: x[0] == name and x[1] == subj and x[2] == obj, missing_info)) == []:
+            missing_info.append([name, subj, obj]) 
         return T(None)
     else:
         return T(lookup[0].value)
