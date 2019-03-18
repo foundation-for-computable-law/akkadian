@@ -71,6 +71,10 @@ class TestDSL(unittest.TestCase):
         self.assertEqual((T(None) > T(None)).value, None)
 
 
+    def test_prob(self):
+        self.assertEqual((T(True,.84) & T(True,.92)).prob, 0.7728)
+
+
     def test_le(self):
         self.assertEqual((T(99) <= T(70)).value, False)
         self.assertEqual((T(70) <= T(70)).value, True)

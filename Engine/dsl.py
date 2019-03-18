@@ -54,8 +54,9 @@ def fact(name, subj, obj = None):
 # Eventually, these will be temporal objects
 
 class T: 
-    def __init__(self, value): 
+    def __init__(self, value, prob = 1): 
         self.value = value
+        self.prob = prob
   
     # &
     def __and__(self, o):
@@ -74,7 +75,7 @@ class T:
         if self.value == None:
             return T(None)
         else:
-            return T(not self.value)
+            return T(not self.value, 1 - self.prob)
 
     # Arithmetic...
     def __add__(self, o): 
@@ -127,39 +128,45 @@ class T:
 
 
 def internal_and(a, b):
-    if type(a) is T and a.value == False:
-        return T(False)
-    elif type(b) is T and b.value == False:
-        return T(False)
-    elif type(a) is not T and a == False:
-        return T(False)
-    elif type(b) is not T and b == False:
-        return T(False)
-    elif type(a) is T and a.value == None:
-        return T(None)
-    elif type(b) is T and b.value == None:
-        return T(None)
+    if type(a) is T and type(b) is T:
+        return more_internal_and(a.value, b.value, a.prob * b.prob)
+    elif type(a) is T:
+        return more_internal_and(a.value, b, a.prob)
+    elif type(b) is T:
+        return more_internal_and(b.value, a, b.prob)
     else:
-        return T(True)
+        return more_internal_and(a, b, 1)
 
 
-def internal_or(a, b):
-    if type(a) is T and a.value == True:
-        return T(True)
-    elif type(b) is T and b.value == True:
-        return T(True)
-    elif type(a) is not T and a == True:
-        return T(True)
-    elif type(b) is not T and b == True:
-        return T(True)
-    elif type(a) is T and a.value == None:
-        return T(None)
-    elif type(b) is T and b.value == None:
-        return T(None)
+def more_internal_and(a, b, prob):
+    if a == False or b == False:
+        return T(False, prob)
+    elif a == None or b == None:
+        return T(None, prob)
     else:
-        return T(False)
+        return T(True, prob)
+
     
-        
+def internal_or(a, b):
+    if type(a) is T and type(b) is T:
+        return more_internal_or(a.value, b.value, a.prob + b.prob - (a.prob * b.prob))
+    elif type(a) is T:
+        return more_internal_or(a.value, b, a.prob)
+    elif type(b) is T:
+        return more_internal_or(b.value, a, b.prob)
+    else:
+        return more_internal_or(a, b, 1)
+
+
+def more_internal_or(a, b, prob):
+    if a == True or b == True:
+        return T(True, prob)
+    elif a == None or b == None:
+        return T(None, prob)
+    else:
+        return T(False, prob)
+
+    
 # Internal processing of binary operators
 # TODO: Make this a private method, if possible
 def process_binary(f, a, b):
