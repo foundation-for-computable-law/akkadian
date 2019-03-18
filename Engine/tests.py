@@ -110,6 +110,8 @@ class TestDSL(unittest.TestCase):
         self.assertEqual((T("hello") == T("meow")).value, False)
         self.assertEqual((T(None) == T("meow")).value, None)
         self.assertEqual((T("hello") == T(None)).value, None)
+        self.assertEqual(("hello" == T(None)).value, None)
+        self.assertEqual(("hello" == T("hello")).value, True)
 
 
     def test_ne(self):

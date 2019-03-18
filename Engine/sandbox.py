@@ -29,12 +29,11 @@ def relationship(a, b): return fact("relationship", a, b)
 
 
 # Getting the value of a fact
-print(fact("gender","jim").value)
-print(fact("relationship","jim","jane").value)
+# fact("gender","jim").value
+# fact("relationship","jim","jane").value
 
 # Invoking rules
-print(is_qualifying_relative("jim","jane").value)
+# is_qualifying_relative("jim","jane").value
 
 # Getting a list of missing information
-print(missing_info)
-
+# print(get_missing_data('sandbox.is_qualifying_relative("jim","jane")', "sandbox", []))

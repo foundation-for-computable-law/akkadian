@@ -21,12 +21,23 @@ missing_info = []
 
 # List of asserted facts (with mock values)
 facts = [
-    Fact("age", "jim", None, 8),
+    Fact("age", "jim", None, 88),
     Fact("age", "jane", None, 92),
     #Fact("gender", "jim", None, "Male"),
     #Fact("gender", "jane", None, "Female"),
     #Fact("relationship", "jim", "jane", "Parent")
 ]
+
+
+# Generates a list of facts needed to resolve a goal
+# The goal is entered as a string, for example: "module.fcn('jim')"
+def get_missing_data(goal, module, fs):
+    #eval("import " + module")
+    import sandbox
+    missing_info = []
+    facts = fs
+    eval(goal) 
+    return missing_info # not working b/c missing facts are not being added to the "facts" list
 
 
 # Gets the value for a fact
