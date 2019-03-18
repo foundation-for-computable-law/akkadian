@@ -22,7 +22,7 @@ def relationship(a, b): return fact("relationship", a, b)
 
 # FACTS
 
-
+# print(facts)
 
 
 # USAGE
@@ -33,7 +33,11 @@ def relationship(a, b): return fact("relationship", a, b)
 # fact("relationship","jim","jane").value
 
 # Invoking rules
-# is_qualifying_relative("jim","jane").value
+#is_qualifying_relative("jim","jane").value
+#print(missing_info)
 
 # Getting a list of missing information
-# print(get_missing_data('sandbox.is_qualifying_relative("jim","jane")', "sandbox", []))
+print(get_missing_data('sandbox.is_qualifying_relative("jim","jone")', "sandbox", []))
+
+
+

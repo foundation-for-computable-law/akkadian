@@ -34,7 +34,7 @@ facts = [
 def get_missing_data(goal, module, fs):
     #eval("import " + module")
     import sandbox
-    missing_info = []
+    missing_info.clear()
     facts = fs
     eval(goal) 
     return missing_info # not working b/c missing facts are not being added to the "facts" list
