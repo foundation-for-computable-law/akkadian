@@ -23,29 +23,65 @@ missing_info = []
 facts = []
 
 
+# Generates an interactive interview to collect info to resolve a goal
+def investigate(goal, fs = []):
+    re = apply_rules(goal, fs)
+    if re["result"] != None:
+        print(re["msg"])
+    else:
+        nxt = re["missing_info"][0]
+        new = input(ask_fact(nxt))
+        newfct = Fact(nxt[1], nxt[2], nxt[3], convert_input(nxt[0], new)) 
+        fs.append(newfct)
+        investigate(goal, fs)
+
+
+# Convert inputs from terminal
+def convert_input(typ, val):
+    if typ == "num":
+        return float(val)
+    elif typ == "str":
+        return val
+    else:
+        return val
+
+
+# Pose fact as a question
+def ask_fact(f):
+    if f[3] == None:
+        return f[1] + " " + f[2] + "? "
+    else:
+        return f[1] + " " + f[2] + " " + f[3] + "? "
+
+    
 # Applies substantive rules to a fact pattern
 # The goal is entered as a string, for example: "module.fcn('jim')"
 def apply_rules(goal, fs):
     exec("import " + goal[0:goal.find('.')]) # Note: causes the imported module to be reevaluated
     missing_info.clear()
+    facts.clear()
     for item in fs:
         facts.append(item)
     result = eval(goal)
     progress = len(facts) / max(len(facts) + len(missing_info), 1)
-    return {
-        "result": result.pretty(),
-        "missing_info": missing_info,
+    out = {
+        "result" : result.value,
+        "certainty" : result.cf,
+        "msg" : result.pretty(),
+        "missing_info" : missing_info,
         "progress" : round(progress, 2)
         }
+    facts.clear()
+    return out
 
 
 # Gets the value for a fact
-def fact(name, subj, obj = None):
+def fact(typ, name, subj, obj = None):
     lookup = list(filter(lambda x: x.name == name and x.subject == subj and x.object == obj, facts))
     if lookup == []:
         # Prevent duplicates from being added
-        if list(filter(lambda x: x[0] == name and x[1] == subj and x[2] == obj, missing_info)) == []:
-            missing_info.append([name, subj, obj]) 
+        if list(filter(lambda x: x[1] == name and x[2] == subj and x[3] == obj, missing_info)) == []:
+            missing_info.append([typ, name, subj, obj]) 
         return T(None)
     else:
         return T(lookup[0].value)
@@ -87,7 +123,8 @@ class T:
         return process_binary(operator.add, self, o)
     def __radd__(self, o): 
         return process_binary(operator.add, self, o)
-    
+
+    # TODO: Add short-circuiting for mul * 0
     def __mul__(self, o): 
         return process_binary(operator.mul, self, o)
     def __rmul__(self, o): 
@@ -132,6 +169,8 @@ class T:
     # TODO: Add list operators
 
 
+# TODO: Make the methods below private, if possible
+
 def internal_and(a, b):
     if type(a) is T and type(b) is T:
         return more_internal_and(a.value, b.value, a.cf * b.cf)
@@ -173,7 +212,7 @@ def more_internal_or(a, b, cf):
 
     
 # Internal processing of binary operators
-# TODO: Make this a private method, if possible
+
 def process_binary(f, a, b):
     if is_none(a) or is_none(b):
         return T(None)

@@ -6,18 +6,18 @@ from dsl import *
 # Substantive rules
 
 def is_qualifying_relative(a, b): return (
-    age(a) < 18 &
-    age(a) >= 18 &
-    gender(b) == 'Female' &
-    ~ relationship(a, b) == "Child"
+    (age(a) < 18) &
+    (age(b) >= 18) &
+    (gender(b) == 'Female') &
+    ~ (relationship(a, b) == "Child")
     )
 
 
 # Base-level facts from the rules
 # These lookup facts from the fact list
-def age(p): return fact("age", p)
-def gender(p): return fact("gender", p)
-def relationship(a, b): return fact("relationship", a, b)
+def age(p): return fact("num", "age", p)
+def gender(p): return fact("str", "gender", p)
+def relationship(a, b): return fact("str", "relationship", a, b)
 
 
 # FACTS
@@ -37,6 +37,9 @@ def relationship(a, b): return fact("relationship", a, b)
 
 
 # Apply the rules to a fact pattern
-# apply_rules('sandbox.is_qualifying_relative("jim","jone")',
+# apply_rules('sandbox.is_qualifying_relative("jim","jane")',
 #             [Fact("age", "jim", None, 88),
 #              Fact("gender","jone",None,"Female")]))
+
+# Initiate an interactive interview
+# investigate('sandbox.is_qualifying_relative("jim","jane")')

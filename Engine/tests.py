@@ -14,6 +14,7 @@ class TestDSL(unittest.TestCase):
         self.assertEqual((T(None) & T(True)).value, None)
         self.assertEqual((T(None) & T(False)).value, False)
         self.assertEqual((T(False) & T(None)).value, False)
+        self.assertEqual((T(None) & T(False)).value, False)
         self.assertEqual((T(True) & T(None)).value, None)
         self.assertEqual((T(None) & T(None)).value, None)
         self.assertEqual((T(True) & True).value, True)
