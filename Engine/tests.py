@@ -6,6 +6,42 @@ from dsl import *
 class TestDSL(unittest.TestCase):
 
 
+    def test_And(self):
+        self.assertEqual(And(T(True), T(False)).value, False)
+        self.assertEqual(And(T(True), T(True)).value, True)
+        self.assertEqual(And(T(False), T(False)).value, False)
+        self.assertEqual(And(T(False), T(True)).value, False)
+        self.assertEqual(And(T(None), T(True)).value, None)
+        self.assertEqual(And(T(None), T(False)).value, False)
+        self.assertEqual(And(T(False), T(None)).value, False)
+        self.assertEqual(And(T(None), T(False)).value, False)
+        self.assertEqual(And(T(True), T(None)).value, None)
+        self.assertEqual(And(T(None), T(None)).value, None)
+        self.assertEqual(And(T(True), True).value, True)
+        self.assertEqual(And(True, T(True)).value, True)
+        self.assertEqual(And(False, T(True)).value, False)
+        self.assertEqual(And(False, T(None)).value, False)
+        self.assertEqual(And(False, T(None), True).value, False)
+        self.assertEqual(And(False, "anything", True).value, False)
+
+
+    def test_Or(self):
+        self.assertEqual(Or(T(True), T(False)).value, True)
+        self.assertEqual(Or(T(True), T(True)).value, True)
+        self.assertEqual(Or(T(False), T(False)).value, False)
+        self.assertEqual(Or(T(False), T(True)).value, True)
+        self.assertEqual(Or(T(None), T(True)).value, True)
+        self.assertEqual(Or(T(None), T(False)).value, None)
+        self.assertEqual(Or(T(False), T(None)).value, None)
+        self.assertEqual(Or(T(True), T(None)).value, True)
+        self.assertEqual(Or(T(None), T(None)).value, None)
+        self.assertEqual(Or(True, T(True)).value, True)
+        self.assertEqual(Or(False, T(True)).value, True)
+        self.assertEqual(Or(False, T(None)).value, None)
+        self.assertEqual(Or(True, T(None)).value, True)
+        self.assertEqual(Or(True, T(False)).value, True)
+        
+
     def test_and(self):
         self.assertEqual((T(True) & T(False)).value, False)
         self.assertEqual((T(True) & T(True)).value, True)

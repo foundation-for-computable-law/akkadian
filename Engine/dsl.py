@@ -1,4 +1,5 @@
 import operator
+import functools
 
 
 # FACTS - MACHINERY
@@ -56,7 +57,7 @@ def ask_fact(f):
     
 # Applies substantive rules to a fact pattern
 # The goal is entered as a string, for example: "module.fcn('jim')"
-def apply_rules(goal, fs):
+def apply_rules(goal, fs = []):
     exec("import " + goal[0:goal.find('.')]) # Note: causes the imported module to be reevaluated
     missing_info.clear()
     facts.clear()
@@ -168,6 +169,20 @@ class T:
     
     # TODO: Add list operators
 
+
+def And(*args):
+    return functools.reduce(internal_and, args)
+
+
+def Or(*args):
+    return functools.reduce(internal_or, args)
+
+
+def Not(a):
+    if type(a) is T and a.value == None:
+        return T(None)
+    else:
+        return T(not a.value, a.cf)
 
 # TODO: Make the methods below private, if possible
 
