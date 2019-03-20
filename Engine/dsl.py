@@ -1,6 +1,6 @@
-import operator
+import datetime
 import functools
-
+import operator
 
 # FACTS - MACHINERY
 
@@ -41,6 +41,8 @@ def investigate(goal, fs = []):
 def convert_input(typ, val):
     if typ == "num":
         return float(val)
+    elif typ == "date":
+        return datetime.datetime.strptime(val, "%Y-%m-%d") # Assumes dates are entered yyyy-mm-dd
     elif typ == "str":
         return val
     else:
@@ -65,12 +67,14 @@ def apply_rules(goal, fs = []):
         facts.append(item)
     result = eval(goal)
     progress = len(facts) / max(len(facts) + len(missing_info), 1)
+    complete = result.value != None
     out = {
         "result" : result.value,
         "certainty" : result.cf,
         "msg" : result.pretty(),
-        "missing_info" : missing_info,
-        "progress" : round(progress, 2)
+        "complete": complete,
+        "progress": 1 if complete else round(progress, 2),
+        "missing_info" : missing_info
         }
     facts.clear()
     return out
@@ -267,8 +271,12 @@ def get_cf(a):
         return a.cf
     else:
         return 1
-    
+
 
 def is_none(a):
     return type(a) is T and a.value == None
 
+
+# A convenience function to make date construction less verbose
+def date(y : int, m : int, d: int):
+    return datetime.datetime(y, m, d)
