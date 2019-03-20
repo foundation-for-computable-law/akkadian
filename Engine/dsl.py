@@ -181,8 +181,31 @@ def Or(*args):
 def Not(a):
     if type(a) is T and a.value == None:
         return T(None)
+    elif type(a) is not T:
+        return T(not a, 1)
     else:
         return T(not a.value, a.cf)
+
+
+# TODO: Implement lazy evaluation so args b and c are only invoked as needed
+# TODO: Finish implementing certainty factors
+def If(a, b, c):
+    if is_none(a):
+        return T(None, a.value)
+    elif type(a) is not T and a == None:
+        return T(None, 1)
+    elif (type(a) is T and a.value == True) or (type(a) is not T and a == True):
+        if type(b) is T:
+            return b
+        else:
+            return T(b)
+    else:
+        if type(c) is T:
+            return c
+        else:
+            return T(c)
+
+
 
 # TODO: Make the methods below private, if possible
 
@@ -230,14 +253,21 @@ def more_internal_or(a, b, cf):
 
 def process_binary(f, a, b):
     if is_none(a) or is_none(b):
-        return T(None)
+        return T(None, max(get_cf(a), get_cf(b)))
     elif type(a) is T and type(b) is T:
-        return T(f(a.value, b.value))
+        return T(f(a.value, b.value), a.cf * b.cf)
     elif type(a) is T:
-        return T(f(a.value, b))
+        return T(f(a.value, b), a.cf)
     else:
-        return T(f(a, b.value))
+        return T(f(a, b.value), b.cf)
 
+
+def get_cf(a):
+    if type(a) is T:
+        return a.cf
+    else:
+        return 1
+    
 
 def is_none(a):
     return type(a) is T and a.value == None

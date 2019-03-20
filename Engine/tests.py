@@ -42,6 +42,14 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Or(True, T(False)).value, True)
         
 
+    def test_Not(self):
+        self.assertEqual(Not(T(True)).value, False)
+        self.assertEqual(Not(T(False)).value, True)
+        self.assertEqual(Not(T(None)).value, None)
+        self.assertEqual(Not(True).value, False)
+        self.assertEqual(Not(False).value, True)
+
+        
     def test_and(self):
         self.assertEqual((T(True) & T(False)).value, False)
         self.assertEqual((T(True) & T(True)).value, True)
@@ -106,10 +114,6 @@ class TestDSL(unittest.TestCase):
         self.assertEqual((354 > T(None)).value, None)
         self.assertEqual((T(None) > 34).value, None)
         self.assertEqual((T(None) > T(None)).value, None)
-
-
-    def test_cf(self):
-        self.assertEqual((T(True,.84) & T(True,.92)).cf, 0.7728)
 
 
     def test_le(self):
@@ -219,7 +223,23 @@ class TestDSL(unittest.TestCase):
         self.assertEqual((1 / T(None)).value, None)
         self.assertEqual((T(None) / 34).value, None)
         self.assertEqual((T(None) / T(None)).value, None)
-        
 
+
+    def test_If(self):
+        self.assertEqual(If(None, 1, 2).value, None)
+        self.assertEqual(If(T(None), 1, 2).value, None)
+        self.assertEqual(If(T(True), 1, 2).value, 1)
+        self.assertEqual(If(True, 1, 2).value, 1)
+        self.assertEqual(If(T(False), 1, 2).value, 2)
+        self.assertEqual(If(False, 1, 2).value, 2)
+
+
+    def test_cf(self):
+        self.assertEqual((T(True,.84) & T(True,.92)).cf, 0.7728)
+        self.assertEqual((T(True,.8) | T(True,.9)).cf, 0.9800000000000001)
+        self.assertEqual((T(9,.5) + T(23,.7)).cf, 0.35)
+        self.assertEqual(Not(T(True,.4)).cf, 0.4)
+
+        
 if __name__ == '__main__':
     unittest.main()
