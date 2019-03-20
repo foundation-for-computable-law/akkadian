@@ -23,16 +23,16 @@ def is_qualifying_relative(a, b): return (
 
 # FACTS
 
-def age(p): return fact("num", "age", p)
+def age(p): return fact("num", "age", p, None, "How old is {0}?")
 
 
-def gender(p): return fact("str", "gender", p)
+def gender(p): return fact("str", "gender", p, None, "What is {0}'s gender?")
 
 
-def relationship(a, b): return fact("str", "relationship", a, b)
+def relationship(a, b): return fact("str", "relationship", a, b, "How is {0} related to {1}?")
 
 
-def citizenship(p): return fact("citizenship", p)
+def citizenship(p): return fact("citizenship", p, None, "What is {0}'s U.S. citizenship status?")
 
 
 # USAGE
@@ -51,4 +51,4 @@ def citizenship(p): return fact("citizenship", p)
 #              Fact("gender","jone",None,"Female")]))
 
 # Initiate an interactive interview
-# investigate('sandbox.is_qualifying_relative("jim","jane")')
+investigate('sandbox.is_qualifying_relative("Jim","Lucy")')

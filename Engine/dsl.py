@@ -50,9 +50,9 @@ def convert_input(typ, val):
 # Pose fact as a question
 def ask_fact(f):
     if f[3] == None:
-        return f[1] + " " + f[2] + "? "
+        return f[4].format(f[2]) + " "
     else:
-        return f[1] + " " + f[2] + " " + f[3] + "? "
+        return f[4].format(f[2], f[3]) + " "
 
     
 # Applies substantive rules to a fact pattern
@@ -77,12 +77,12 @@ def apply_rules(goal, fs = []):
 
 
 # Gets the value for a fact
-def fact(typ, name, subj, obj = None):
+def fact(typ, name, subj, obj, question = None):
     lookup = list(filter(lambda x: x.name == name and x.subject == subj and x.object == obj, facts))
     if lookup == []:
         # Prevent duplicates from being added
         if list(filter(lambda x: x[1] == name and x[2] == subj and x[3] == obj, missing_info)) == []:
-            missing_info.append([typ, name, subj, obj]) 
+            missing_info.append([typ, name, subj, obj, question])
         return T(None)
     else:
         return T(lookup[0].value)
