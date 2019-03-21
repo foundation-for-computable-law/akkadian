@@ -2,6 +2,10 @@ import datetime
 import functools
 import operator
 
+
+# TODO: Reorganize this file
+
+
 # FACTS - MACHINERY
 
 
@@ -25,78 +29,118 @@ facts = []
 
 
 # Generates an interactive interview to collect info to resolve a goal
-def investigate(goal, fs = []):
-    re = apply_rules(goal, fs)
-    if re["result"] != None:
-        print(re["msg"])
+def Investigate(goals: list, fs=[]):
+
+    # Call the "apply rules" interface
+    re = Apply_rules(goals, fs)
+
+    # If all of the goals have been determined, present the results
+    if re["complete"]:
+        print(re["msg"])  # TODO
+
+    # Otherwise, ask the next question...
     else:
+        # Find out what the next question is
         nxt = re["missing_info"][0]
-        new = input(ask_fact(nxt))
-        newfct = Fact(nxt[1], nxt[2], nxt[3], convert_input(nxt[0], new)) 
-        fs.append(newfct)
-        investigate(goal, fs)
+
+        # Ask it
+        new = input(nxt[4])
+
+        # Add the newly acquired fact to the fact list
+        fs.append(Fact(nxt[1], nxt[2], nxt[3], convert_input(nxt[0], new)))
+
+        # Go to step 1
+        Investigate(goals, fs)
 
 
-# Convert inputs from terminal
-def convert_input(typ, val):
+# Convert inputs from the terminal to the desired type
+# Assumes dates are entered as yyyy-mm-dd
+def convert_input(typ: str, val: str):
     if typ == "num":
         return float(val)
     elif typ == "date":
-        return datetime.datetime.strptime(val, "%Y-%m-%d") # Assumes dates are entered yyyy-mm-dd
+        return datetime.datetime.strptime(val, "%Y-%m-%d")
     elif typ == "str":
         return val
     else:
         return val
 
 
-# Pose fact as a question
-def ask_fact(f):
-    if f[3] == None:
-        return f[4].format(f[2]) + " "
-    else:
-        return f[4].format(f[2], f[3]) + " "
-
-    
 # Applies substantive rules to a fact pattern
-# The goal is entered as a string, for example: "module.fcn('jim')"
-def apply_rules(goal, fs = []):
-    exec("import " + goal[0:goal.find('.')]) # Note: causes the imported module to be reevaluated
+# Returns a determination or a list of needed information
+# Each goal is entered as a string, for example: "module.fcn('jim')"
+def Apply_rules(goals: list, fs=[]):
+
+    # Load namespaces
+    for goal in goals:
+        exec("import " + goal[0:goal.find('.')]) # Note: causes the imported module to be reevaluated
+
+    # Clear and reload data structures
     missing_info.clear()
     facts.clear()
     for item in fs:
         facts.append(item)
-    result = eval(goal)
+
+    # Evaluate goals (causing missing_info to be reloaded)
+    results = list(map(eval, goals))
+
+    # Estimate interview progress
     progress = len(facts) / max(len(facts) + len(missing_info), 1)
-    complete = result.value != None
-    out = {
-        "result" : result.value,
-        "certainty" : result.cf,
-        "msg" : result.pretty(),
-        "complete": complete,
-        "progress": 1 if complete else round(progress, 2),
-        "missing_info" : missing_info
-        }
+
+    # Have all of the goals been determined?
+    complete = all(map(lambda x : x.value is not None, results))
+
+    # For each result, format it as a dictionary
+    # TODO: In each dictionary, include the function name that was being called
+    result_blocks = list(map(lambda x : process_results(x), results))
+
+    # Housekeeping
     facts.clear()
-    return out
+
+    # Mic drop
+    return {
+        "complete": complete,
+        "progress": 1.0 if complete else round(progress, 2),
+        "msg": results[0].pretty(),  # TODO: Generalize to multiple goals
+        "results": result_blocks,
+        "missing_info": [] if complete else missing_info
+    }
 
 
 # Gets the value for a fact
-def fact(typ, name, subj, obj, question = None):
+def In(typ: str, name: str, subj: str, obj, question=None):
+
+    # See if the desired fact is in the "facts" data structure
     lookup = list(filter(lambda x: x.name == name and x.subject == subj and x.object == obj, facts))
+
+    # If not, add it
     if lookup == []:
+
         # Prevent duplicates from being added
         if list(filter(lambda x: x[1] == name and x[2] == subj and x[3] == obj, missing_info)) == []:
-            missing_info.append([typ, name, subj, obj, question])
+            missing_info.append([typ, name, subj, obj, text_subst(subj, obj, question)])
+
+        # Indicate lack of knowledge
         return T(None)
+
+    # If the fact is known, return its value
     else:
         return T(lookup[0].value)
+
+
+# Substitute the subject ({0}) and object ({1}) of a fact into the question text
+def text_subst(sbj: str, obj: str, question: str):
+    if obj is None:
+        return question.format(sbj) + " "
+    else:
+        return question.format(sbj, obj) + " "
 
 
 # T OBJECTS
 # Eventually, these will be temporal objects
 
 class T: 
-    def __init__(self, value, cf = 1): 
+    def __init__(self, value, cf=1):
         self.value = value
         self.cf = cf  # certainty factor
 
@@ -107,18 +151,20 @@ class T:
     # &
     def __and__(self, o):
         return internal_and(self, o)
+
     def __rand__(self, o):
         return internal_and(self, o)
     
     # |
     def __or__(self, o): 
         return internal_or(self, o)
+
     def __ror__(self, o): 
         return internal_or(self, o)
 
     # ~
     def __invert__(self):
-        if self.value == None:
+        if self.value is None:
             return T(None)
         else:
             return T(not self.value, self.cf)
@@ -126,22 +172,26 @@ class T:
     # Arithmetic...
     def __add__(self, o): 
         return process_binary(operator.add, self, o)
+
     def __radd__(self, o): 
         return process_binary(operator.add, self, o)
 
     # TODO: Add short-circuiting for mul * 0
     def __mul__(self, o): 
         return process_binary(operator.mul, self, o)
+
     def __rmul__(self, o): 
         return process_binary(operator.mul, self, o)
     
     def __sub__(self, o): 
         return process_binary(operator.sub, self, o)
+
     def __rsub__(self, o): 
         return process_binary(operator.sub, o, self)
     
     def __truediv__(self, o): 
         return process_binary(operator.truediv, self, o)
+
     def __rtruediv__(self, o): 
         return process_binary(operator.truediv, o, self)
     
@@ -183,7 +233,7 @@ def Or(*args):
 
 
 def Not(a):
-    if type(a) is T and a.value == None:
+    if type(a) is T and a.value is None:
         return T(None)
     elif type(a) is not T:
         return T(not a, 1)
@@ -196,9 +246,9 @@ def Not(a):
 def If(a, b, c):
     if is_none(a):
         return T(None, a.value)
-    elif type(a) is not T and a == None:
+    elif type(a) is not T and a is None:
         return T(None, 1)
-    elif (type(a) is T and a.value == True) or (type(a) is not T and a == True):
+    elif (type(a) is T and a.value is True) or (type(a) is not T and a is True):
         if type(b) is T:
             return b
         else:
@@ -210,8 +260,8 @@ def If(a, b, c):
             return T(c)
 
 
-
 # TODO: Make the methods below private, if possible
+
 
 def internal_and(a, b):
     if type(a) is T and type(b) is T:
@@ -225,9 +275,9 @@ def internal_and(a, b):
 
 
 def more_internal_and(a, b, cf):
-    if a == False or b == False:
+    if a is False or b is False:
         return T(False, cf)
-    elif a == None or b == None:
+    elif a is None or b is None:
         return T(None, cf)
     else:
         return T(True, cf)
@@ -245,9 +295,9 @@ def internal_or(a, b):
 
 
 def more_internal_or(a, b, cf):
-    if a == True or b == True:
+    if a is True or b is True:
         return T(True, cf)
-    elif a == None or b == None:
+    elif a is None or b is None:
         return T(None, cf)
     else:
         return T(False, cf)
@@ -274,9 +324,19 @@ def get_cf(a):
 
 
 def is_none(a):
-    return type(a) is T and a.value == None
+    return type(a) is T and a.value is None
+
+
+# Given a T object, format its values into a dictionary
+def process_results(result : T):
+    return {
+        "result": result.value,
+        "certainty": result.cf,
+        "msg": result.pretty(),
+        "complete": result.value is not None
+    }
 
 
 # A convenience function to make date construction less verbose
-def date(y : int, m : int, d: int):
+def Date(y : int, m : int, d: int):
     return datetime.datetime(y, m, d)

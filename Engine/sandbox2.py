@@ -65,13 +65,13 @@ def is_eligible_health_benefit(person):
 def age(p): return fact("num", "age", p)
 
 
-def gender(p): return fact("str", "gender", p)
+def gender(p): return In("str", "gender", p)
 
 
-def relationship(a, b): return fact("str", "relationship", a, b)
+def relationship(a, b): return In("str", "relationship", a, b)
 
 
-def citizenship(p): return fact("citizenship", p)
+def citizenship(p): return In("citizenship", p)
 
 
 

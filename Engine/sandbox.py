@@ -18,26 +18,34 @@ def is_qualifying_relative(a, b):
                age(b) >= 18,
                gender(b) == 'Female',
                Not(relationship(a, b) == "Child"),
-               assessment_date() > date(2000, 1, 1))
+               assessment_date() > Date(2000, 1, 1))
 
 
+def another_rule(p):
+    return Or(age(p) >= 12,
+              citizenship(p) == "U.S. Citizen")
 
 
 # FACTS
 
-def age(p): return fact("num", "age", p, None, "How old is {0}?")
+def age(p):
+    return In("num", "age", p, None, "How old is {0}?")
 
 
-def gender(p): return fact("str", "gender", p, None, "What is {0}'s gender?")
+def gender(p):
+    return In("str", "gender", p, None, "What is {0}'s gender?")
 
 
-def relationship(a, b): return fact("str", "relationship", a, b, "How is {0} related to {1}?")
+def relationship(a, b):
+    return In("str", "relationship", a, b, "How is {0} related to {1}?")
 
 
-def citizenship(p): return fact("str", "citizenship", p, None, "What is {0}'s U.S. citizenship status?")
+def citizenship(p):
+    return In("str", "citizenship", p, None, "What is {0}'s U.S. citizenship status?")
 
 
-def assessment_date(): return fact("date", "assessment_date", None, None, "What is the assessment date?")
+def assessment_date():
+    return In("date", "assessment_date", None, None, "What is the assessment date?")
 
 
 # USAGE
@@ -51,9 +59,9 @@ def assessment_date(): return fact("date", "assessment_date", None, None, "What 
 # is_qualifying_relative("jim","jane").value
 
 # Apply the rules to a fact pattern
-#print(apply_rules('sandbox.is_qualifying_relative("Jim","Lucy")',
-#                  [Fact("gender", "Lucy", None, "Female")]))
+#print(Apply_rules(['sandbox.is_qualifying_relative("Jim","Lucy")','sandbox.another_rule("Lucy")']))
 
 # Initiate an interactive interview
-investigate('sandbox.is_qualifying_relative("Jim","Lucy")')
+# Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'],[Fact("assessment_date", None, None, Date(1999,1,1))])
+Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'])
 
