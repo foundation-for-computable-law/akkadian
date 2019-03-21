@@ -11,7 +11,7 @@ General features supported by this library:
 - Ability to model complex temporal requirements
 - Calculation of the certainty of each conclusion
 
-For more information, see the language introduction and syntax reference.
+For more information, see the [wiki](https://github.com/mpoulshock/python-dsl-for-law/wiki).
 
 ## Purpose
 
