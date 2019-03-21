@@ -13,14 +13,14 @@ from dsl import *
 #    )
 
 
-def is_qualifying_relative(a, b): return (
-    And(age(a) < 18,
-        age(b) >= 18,
-        gender(b) == 'Female',
-        Not(relationship(a, b) == "Child"),
-        assessment_date() > date(2000, 1, 1)
-        )
-    )
+def is_qualifying_relative(a, b):
+    return And(age(a) < 18,
+               age(b) >= 18,
+               gender(b) == 'Female',
+               Not(relationship(a, b) == "Child"),
+               assessment_date() > date(2000, 1, 1))
+
+
 
 
 # FACTS
