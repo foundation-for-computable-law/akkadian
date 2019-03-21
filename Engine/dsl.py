@@ -1,6 +1,7 @@
 import datetime
 import functools
 import operator
+from datetime import date
 
 
 # TODO: Reorganize this file
@@ -59,9 +60,14 @@ def convert_input(typ: str, val: str):
     if typ == "num":
         return float(val)
     elif typ == "date":
-        return datetime.datetime.strptime(val, "%Y-%m-%d")
+        return date.fromisoformat(val)
     elif typ == "str":
         return val
+    elif typ == "bool":
+        if val in ("true", "True", "T", "t", "yes", "y"):
+            return True
+        else:
+            return False
     else:
         return val
 
@@ -108,7 +114,7 @@ def Apply_rules(goals: list, fs=[]):
 
 
 # Gets the value for a fact
-def In(typ: str, name: str, subj: str, obj, question=None):
+def In(typ: str, name: str, subj, obj, question=None):
 
     # See if the desired fact is in the "facts" data structure
     lookup = list(filter(lambda x: x.name == name and x.subject == subj and x.object == obj, facts))
@@ -338,5 +344,10 @@ def process_results(result : T):
 
 
 # A convenience function to make date construction less verbose
+# TODO: Handle uncertainty and T values
 def Date(y : int, m : int, d: int):
-    return datetime.datetime(y, m, d)
+    return date(y, m, d)
+
+
+# Returns the current date
+Now = date.today()

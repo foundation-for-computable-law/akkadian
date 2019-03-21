@@ -22,7 +22,9 @@ def is_qualifying_relative(a, b):
 
 
 def another_rule(p):
-    return Or(age(p) >= 12,
+    return Or(expedited_app(p),
+              assessment_date() > Now,
+              age(p) >= 12,
               citizenship(p) == "U.S. Citizen")
 
 
@@ -48,6 +50,10 @@ def assessment_date():
     return In("date", "assessment_date", None, None, "What is the assessment date?")
 
 
+def expedited_app(p):
+    return In("bool", "expedited_app", p, None, "Does {0} require an expedited application?")
+
+
 # USAGE
 
 
@@ -59,9 +65,9 @@ def assessment_date():
 # is_qualifying_relative("jim","jane").value
 
 # Apply the rules to a fact pattern
-#print(Apply_rules(['sandbox.is_qualifying_relative("Jim","Lucy")','sandbox.another_rule("Lucy")']))
+# print(Apply_rules(['sandbox.is_qualifying_relative("Jim","Lucy")','sandbox.another_rule("Lucy")']))
 
 # Initiate an interactive interview
 # Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'],[Fact("assessment_date", None, None, Date(1999,1,1))])
-Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'])
-
+# Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'])
+Investigate(['sandbox.another_rule("Neela")'])
