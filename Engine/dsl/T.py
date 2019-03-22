@@ -135,16 +135,16 @@ def is_none(a):
 
 # Global variable representing a rule stub
 def Stub(cf=1):
-    return T(stubval, cf)
+    return T(StubVal, cf)
 
 
 # Used internally to indicate that a T object is a stub
-stubval = "#stub#"
+StubVal = "#stub#"
 
 
 # Determines whether a T object is a stub
 def is_stub(a):
-    return get_val(a) == stubval
+    return get_val(a) == StubVal
 
 
 # LOGIC
