@@ -5,13 +5,6 @@ from dsl import *
 
 # Substantive rules
 
-#def is_qualifying_relative(a, b): return (
-#    (age(a) < 18) &
-#    (age(b) >= 18) &
-#    (gender(b) == 'Female') &
-#    ~ (relationship(a, b) == "Child")
-#    )
-
 
 def is_qualifying_relative(a, b):
     return And(age(a) < 18,

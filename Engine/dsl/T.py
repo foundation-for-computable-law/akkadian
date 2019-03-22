@@ -12,7 +12,7 @@ class T:
 
     # Display the value as a string
     def pretty(self):
-        return str(self.value) + " (" + str(round(self.cf * 100)) + "% certain)"
+        return str("Stub" if is_stub(self) else self.value) + " (" + str(round(self.cf * 100)) + "% certain)"
 
     # &
     def __and__(self, o):
@@ -91,7 +91,9 @@ class T:
 
 # Internal processing of most binary operators
 def process_binary(f, a, b):
-    if is_none(a) or is_none(b):
+    if is_stub(a) or is_stub(b):
+        return Stub(max(get_cf(a), get_cf(b)))
+    elif is_none(a) or is_none(b):
         return T(None, max(get_cf(a), get_cf(b)))
     else:
         return T(f(get_val(a), get_val(b)), get_cf(a) * get_cf(b))
@@ -102,6 +104,8 @@ def process_binary(f, a, b):
 def process_binary_mult(a, b):
     if get_val(a) == 0 or get_val(b) == 0:
         return T(0, get_cf(a) * get_cf(b))
+    elif is_stub(a) or is_stub(b):
+        return Stub(get_cf(a) * get_cf(b))
     elif is_none(a) or is_none(b):
         return T(None, max(get_cf(a), get_cf(b)))
     else:
@@ -129,6 +133,20 @@ def is_none(a):
     return type(a) is T and a.value is None
 
 
+# Global variable representing a rule stub
+def Stub(cf=1):
+    return T(stubval, cf)
+
+
+# Used internally to indicate that a T object is a stub
+stubval = "#stub#"
+
+
+# Determines whether a T object is a stub
+def is_stub(a):
+    return get_val(a) == stubval
+
+
 # LOGIC
 
 
@@ -141,27 +159,10 @@ def Or(*args):
 
 
 def Not(a):
-    if is_none(a):
-        return T(None)
+    if is_none(a) or is_stub(a):
+        return a
     else:
         return T(not get_val(a), get_cf(a))
-
-
-# TODO: Implement lazy evaluation so args b and c are only invoked as needed
-# TODO: Finish implementing certainty factors
-def If(a, b, c):
-    if get_val(a) is None:
-        return T(None, get_cf(a))
-    elif get_val(a):
-        if type(b) is T:
-            return b
-        else:
-            return T(b)
-    else:
-        if type(c) is T:
-            return c
-        else:
-            return T(c)
 
 
 # TODO: Make the methods below private, if possible
@@ -176,6 +177,8 @@ def more_internal_and(a, b, cf):
         return T(False, cf)
     elif a is None or b is None:
         return T(None, cf)
+    elif is_stub(a) or is_stub(b):
+        return Stub(cf)
     else:
         return T(True, cf)
 
@@ -191,5 +194,31 @@ def more_internal_or(a, b, cf):
         return T(True, cf)
     elif a is None or b is None:
         return T(None, cf)
+    elif is_stub(a) or is_stub(b):
+        return Stub(cf)
     else:
         return T(False, cf)
+
+
+# CONDITIONALS
+
+
+# TODO: Implement lazy evaluation so args b and c are only invoked as needed
+# TODO: Finish implementing certainty factors
+def If(a, b, c):
+    if is_none(a) or is_stub(a):
+        return a
+    #if get_val(a) is None:
+    #    return T(None, get_cf(a))
+    #elif is_stub(a):
+    #    return a
+    elif get_val(a):
+        if type(b) is T:
+            return b
+        else:
+            return T(b)
+    else:
+        if type(c) is T:
+            return c
+        else:
+            return T(c)

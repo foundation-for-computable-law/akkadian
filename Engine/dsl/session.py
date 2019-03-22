@@ -31,7 +31,9 @@ def Investigate(goals: list, fs=[]):
 # Convert inputs from the terminal to the desired type
 # Assumes dates are entered as yyyy-mm-dd
 def convert_input(typ: str, val: str):
-    if typ == "num":
+    if val in ("Stub", "stub"):
+        return Stub()
+    elif typ == "num":
         return float(val)
     elif typ == "date":
         return date.fromisoformat(val)
