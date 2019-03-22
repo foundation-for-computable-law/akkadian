@@ -6,7 +6,7 @@ from dsl import *
 
 # Evaluates whether anyone in the household list is eligible for a benefit
 def household_has_eligible_member(household):
-    return Exists(household, eligible_member(_, household))
+    return Exists(lambda x: eligible_member(x, household), household)
 
 
 # High-level eligibility
@@ -26,12 +26,13 @@ def is_eligible_cash_benefit(person, household):
 # if < 18 and is a child of someone in the household then true
 def is_child(person, household):
     return And(age(person) <= 16,
-               Exists(household, relationship(person, _) == 'Child'))  # How should this function work?
+               Exists(lambda x: relationship(person, x) == 'Child', household))
 
 
 def is_parent(person, household):
-    return Exists(household, Or(relationship(person, _) == "Parent",
-                                relationship(_, person) == "Child"))
+    return Exists(lambda x: Or(relationship(person, x) == "Parent",
+                                relationship(x, person) == "Child"),
+                  household)
 
 
 def under_19(person):
@@ -41,7 +42,7 @@ def under_19(person):
 # Get count of children
 def num_children(person, household):
     return Count_if(household, And(age(person) < 18,
-                                   is_child(person, household))) # How should this function work?
+                                   is_child(person, household)))
 
 
 # Get count of adults
@@ -62,16 +63,20 @@ def is_eligible_health_benefit(person):
 
 # Base-level facts from the rules
 # These lookup facts from the fact list
-def age(p): return fact("num", "age", p)
+def age(p):
+    return In("num", "age", p, None, "How old is {0}?")
 
 
-def gender(p): return In("str", "gender", p)
+def gender(p):
+    return In("str", "gender", p, None, "What is {0}'s gender?")
 
 
-def relationship(a, b): return In("str", "relationship", a, b)
+def relationship(a, b):
+    return In("str", "relationship", a, b, "How is {0} related to {1}?")
 
 
-def citizenship(p): return In("citizenship", p)
+def citizenship(p):
+    return In("str", "citizenship", p, None, "What is {0}'s U.S. citizenship status?")
 
 
 
