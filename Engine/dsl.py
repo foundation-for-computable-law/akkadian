@@ -182,12 +182,11 @@ class T:
     def __radd__(self, o): 
         return process_binary(operator.add, self, o)
 
-    # TODO: Add short-circuiting for mul * 0
-    def __mul__(self, o): 
-        return process_binary(operator.mul, self, o)
+    def __mul__(self, o):
+        return process_binary_mult(self, o)
 
-    def __rmul__(self, o): 
-        return process_binary(operator.mul, self, o)
+    def __rmul__(self, o):
+        return process_binary_mult(self, o)
     
     def __sub__(self, o): 
         return process_binary(operator.sub, self, o)
@@ -239,22 +238,18 @@ def Or(*args):
 
 
 def Not(a):
-    if type(a) is T and a.value is None:
+    if is_none(a):
         return T(None)
-    elif type(a) is not T:
-        return T(not a, 1)
     else:
-        return T(not a.value, a.cf)
+        return T(not get_val(a), get_cf(a))
 
 
 # TODO: Implement lazy evaluation so args b and c are only invoked as needed
 # TODO: Finish implementing certainty factors
 def If(a, b, c):
-    if is_none(a):
-        return T(None, a.value)
-    elif type(a) is not T and a is None:
-        return T(None, 1)
-    elif (type(a) is T and a.value is True) or (type(a) is not T and a is True):
+    if get_val(a) is None:
+        return T(None, get_cf(a))
+    elif get_val(a):
         if type(b) is T:
             return b
         else:
@@ -270,14 +265,7 @@ def If(a, b, c):
 
 
 def internal_and(a, b):
-    if type(a) is T and type(b) is T:
-        return more_internal_and(a.value, b.value, a.cf * b.cf)
-    elif type(a) is T:
-        return more_internal_and(a.value, b, a.cf)
-    elif type(b) is T:
-        return more_internal_and(b.value, a, b.cf)
-    else:
-        return more_internal_and(a, b, 1)
+    return more_internal_and(get_val(a), get_val(b), get_cf(a) * get_cf(b))
 
 
 def more_internal_and(a, b, cf):
@@ -290,14 +278,9 @@ def more_internal_and(a, b, cf):
 
     
 def internal_or(a, b):
-    if type(a) is T and type(b) is T:
-        return more_internal_or(a.value, b.value, a.cf + b.cf - (a.cf * b.cf))
-    elif type(a) is T:
-        return more_internal_or(a.value, b, a.cf)
-    elif type(b) is T:
-        return more_internal_or(b.value, a, b.cf)
-    else:
-        return more_internal_or(a, b, 1)
+    cfa = get_cf(a)
+    cfb = get_cf(b)
+    return more_internal_or(get_val(a), get_val(b), cfa + cfb - (cfa * cfb))
 
 
 def more_internal_or(a, b, cf):
@@ -309,19 +292,26 @@ def more_internal_or(a, b, cf):
         return T(False, cf)
 
     
-# Internal processing of binary operators
-
+# Internal processing of most binary operators
 def process_binary(f, a, b):
     if is_none(a) or is_none(b):
         return T(None, max(get_cf(a), get_cf(b)))
-    elif type(a) is T and type(b) is T:
-        return T(f(a.value, b.value), a.cf * b.cf)
-    elif type(a) is T:
-        return T(f(a.value, b), a.cf)
     else:
-        return T(f(a, b.value), b.cf)
+        return T(f(get_val(a), get_val(b)), get_cf(a) * get_cf(b))
 
 
+# Special case for multiplication
+# Short-circuits when one of the values is 0
+def process_binary_mult(a, b):
+    if get_val(a) == 0 or get_val(b) == 0:
+        return T(0, get_cf(a) * get_cf(b))
+    elif is_none(a) or is_none(b):
+        return T(None, max(get_cf(a), get_cf(b)))
+    else:
+        return T(get_val(a) * get_val(b), get_cf(a) * get_cf(b))
+
+
+# Gets the certainty factor of a T object or scalar
 def get_cf(a):
     if type(a) is T:
         return a.cf
@@ -329,6 +319,15 @@ def get_cf(a):
         return 1
 
 
+# Gets the value of a T object or scalar
+def get_val(a):
+    if type(a) is T:
+        return a.value
+    else:
+        return a
+
+
+# Determines whether an object is a T with a value of None
 def is_none(a):
     return type(a) is T and a.value is None
 
@@ -345,7 +344,7 @@ def process_results(result : T):
 
 # A convenience function to make date construction less verbose
 # TODO: Handle uncertainty and T values
-def Date(y : int, m : int, d: int):
+def Date(y: int, m: int, d: int):
     return date(y, m, d)
 
 
