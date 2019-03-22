@@ -13,26 +13,45 @@ from dsl import *
 #    )
 
 
-def is_qualifying_relative(a, b): return (
-    And(age(a) < 18,
-        age(b) >= 18,
-        gender(b) == 'Female',
-        Not(relationship(a, b) == "Child"))
-    )
+def is_qualifying_relative(a, b):
+    return And(age(a) < 18,
+               age(b) >= 18,
+               gender(b) == 'Female',
+               Not(relationship(a, b) == "Child"),
+               assessment_date() > Date(2000, 1, 1))
+
+
+def another_rule(p):
+    return Or(expedited_app(p),
+              assessment_date() > Now,
+              age(p) >= 12,
+              citizenship(p) == "U.S. Citizen")
 
 
 # FACTS
 
-def age(p): return fact("num", "age", p)
+def age(p):
+    return In("num", "age", p, None, "How old is {0}?")
 
 
-def gender(p): return fact("str", "gender", p)
+def gender(p):
+    return In("str", "gender", p, None, "What is {0}'s gender?")
 
 
-def relationship(a, b): return fact("str", "relationship", a, b)
+def relationship(a, b):
+    return In("str", "relationship", a, b, "How is {0} related to {1}?")
 
 
-def citizenship(p): return fact("citizenship", p)
+def citizenship(p):
+    return In("str", "citizenship", p, None, "What is {0}'s U.S. citizenship status?")
+
+
+def assessment_date():
+    return In("date", "assessment_date", None, None, "What is the assessment date?")
+
+
+def expedited_app(p):
+    return In("bool", "expedited_app", p, None, "Does {0} require an expedited application?")
 
 
 # USAGE
@@ -43,12 +62,12 @@ def citizenship(p): return fact("citizenship", p)
 # fact("relationship","jim","jane").value
 
 # Invoking rules
-#is_qualifying_relative("jim","jane").value
+# is_qualifying_relative("jim","jane").value
 
 # Apply the rules to a fact pattern
-# apply_rules('sandbox.is_qualifying_relative("jim","jane")',
-#             [Fact("age", "jim", None, 88),
-#              Fact("gender","jone",None,"Female")]))
+# print(Apply_rules(['sandbox.is_qualifying_relative("Jim","Lucy")','sandbox.another_rule("Lucy")']))
 
 # Initiate an interactive interview
-# investigate('sandbox.is_qualifying_relative("jim","jane")')
+# Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'],[Fact("assessment_date", None, None, Date(1999,1,1))])
+# Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'])
+Investigate(['sandbox.another_rule("Neela")'])

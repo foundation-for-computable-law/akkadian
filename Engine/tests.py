@@ -201,6 +201,8 @@ class TestDSL(unittest.TestCase):
         self.assertEqual((1 * T(None)).value, None)
         self.assertEqual((T(None) * 34).value, None)
         self.assertEqual((T(None) * T(None)).value, None)
+        self.assertEqual((T(None) * 0).value, 0)
+        self.assertEqual((0 * T(None)).value, 0)
 
 
     def test_sub(self):
