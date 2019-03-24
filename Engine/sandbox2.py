@@ -9,24 +9,27 @@ from dsl import *
 
 #can we make person/spouse global?
 def personal_allowances_wksheet_complete(person, spouse): return(
-        claiming_self(person) + file_married_jointly(person, spouse) + file_head_of_household(person) +
-        only_job_or_low_wage_second(person, spouse) + child_tax_credit() + credit_for_other_dependents() +
-        other_credits() 
+        claiming_self(person) + file_married_jointly(person, spouse) + file_head_of_household(person) 
+        + only_job_or_low_wage_second(person, spouse) + child_tax_credit() + credit_for_other_dependents() 
+        + other_credits() 
     )
 
 
 #A, default to true/1?
 def claiming_self(person): 
-    if(claiming_self(person)):
-        return (1)
+    #fix if
+    If(is_claiming_self(person)):
+        return 1
 
 #B, married, filing jointly
 def file_married_jointly(person, spouse): 
-    if(And(is_married(person, spouse), filing_jointly(person))):
+    If(And(is_married(person, spouse), 
+        filing_jointly(person))):
         return 1 
 
 #intermediates help with readability? 
-def filing_jointly(person): return(tax_status)
+def filing_jointly(person): 
+    return(tax_status)
 
 
 #convert boolean to 1/0 for adding?
@@ -74,15 +77,94 @@ def only_job_or_low_wage_second(person, spouse):
     elif(combined_couple_wages(person, spouse) <= 1500):
         return 1
     
-def married_filing_separately(person, spouse): return(
-    And(is_married(person, spouse),
-    filing_separately(person)))
+def married_filing_separately(person, spouse): 
+    return(
+        And(is_married(person, spouse),
+        filing_separately(person))
+    )
 
-def filing_separately(p): return(Not(filing_jointly(p)))
+def filing_separately(p): 
+    return(
+        Not(
+            filing_jointly(p)
+            )
+            )
 
-def child_tax_credit(): return(0)
-def credit_for_other_dependents(): return(0)
-def other_credits(): return(0)
+def child_tax_credit(person, spouse): 
+    """
+    Child tax credit. See Pub. 972, Child Tax Credit, for more information.
+    • If your total income will be less than $71,201 ($103,351 if married filing jointly), enter “4” for each eligible child.
+    • If your total income will be from $71,201 to $179,050 ($103,351 to $345,850 if married filing jointly), enter “2” for each
+    eligible child.
+    • If your total income will be from $179,051 to $200,000 ($345,851 to $400,000 if married filing jointly), enter “1” for
+    each eligible child.
+    • If your total income will be higher than $200,000 ($400,000 if married filing jointly), enter “-0-” . . . . . . .
+    """
+
+    If(spouse is not None):
+        If(file_married_jointly(person, spouse)):
+            If(total_income(person) + total_income(spouse) < 103,351):
+                return 4 * num_children(person)
+            elif(And(total_income(person) + total_income(spouse) >= 103,351,
+                total_income(person) + total_income(spouse) <= 345,850)):
+                return 2 * num_children(person)
+            elif(And(total_income(person) + total_income(spouse) >= 345,851,
+                total_income(person) + total_income(spouse) <= 400,000)):
+                return num_children(person)
+            else:
+                return 0
+
+    #no spouse
+    else:
+        If(total_income(person) < 71,201):
+            return 4 * num_children(person)
+        elif(And(total_income(person) >= 71,201,
+            total_income(person) <=179,051)):
+            return 2 * num_children(person)
+        elif(And(total_income(person) >= 179,051,
+            total_income(person) <=200,000)):
+            return num_children(person)
+        else:
+            return 0
+
+def credit_for_other_dependents(): 
+    """
+    Credit for other dependents. See Pub. 972, Child Tax Credit, for more information.
+    • If your total income will be less than $71,201 ($103,351 if married filing jointly), enter “1” for each eligible dependent.
+    • If your total income will be from $71,201 to $179,050 ($103,351 to $345,850 if married filing jointly), enter “1” for every
+    two dependents (for example, “-0-” for one dependent, “1” if you have two or three dependents, and “2” if you have
+    four dependents).
+    • If your total income will be higher than $179,050 ($345,850 if married filing jointly), enter “-0-” . . . . . .
+    """
+    If(spouse is not None):
+        If(file_married_jointly(person, spouse)):
+            If(total_income(person) + total_income(spouse) < 103,351):
+                return num_dependents(person)
+            elif(And(total_income(person) + total_income(spouse) >= 103,351,
+                total_income(person) + total_income(spouse) <= 345,850)):
+                return math.floor(num_dependents(person) / 2)
+            elif(total_income(person) + total_income(spouse) > 345,850):
+                return 0
+    #no spouse
+    else:
+        If(total_income(person) < 71,201):
+            return num_dependents(person)
+        elif(And(total_income(person) >= 71,201,
+            total_income(person) <=179,051)):
+            return math.floor(num_dependents(person) / 2)
+        elif(total_income(person) > 179,050):
+            return 0
+
+
+def other_credits(person): 
+    """
+    Other credits. If you have other credits, see Worksheet 1-6 of Pub. 505 and enter the amount from that worksheet
+    here. If you use Worksheet 1-6, enter “-0-” on lines E and F . . . . 
+    """
+    If(has_other_credits(person)):
+        return other_credits_pub505(person)
+    else:
+        return 0
 
 
 def spouse_unemployed(s): return(
@@ -106,25 +188,24 @@ def has_only_one_job(person):
 
 
 #base level attributes? Can we make these "fall out"?
-def is_married(person, spouse): return relationship(person, spouse) == "Married"
+def is_married(person, spouse): 
+    return marital_status(p) == "Married"
+
+def marital_status(p):
+    return(In("str", "marital_status", p, None, "What is {0}'s marital status?"))
 
 def tax_status(p):
     return In("str", "tax_status", p, None, "How does {0} plan to file taxes?")
 
-def head_of_household(p): return(In("bool", "head_of_household", p, None, "Is {0} the head of their household?"))
+def head_of_household(p): 
+    return(In("bool", "head_of_household", p, None, "Is {0} the head of their household?"))
 
 #converting boolean to integer for summing, is there a better pattern to employ?
-def is_claiming_self(p): return(
-    In("bool", "claim_self", p, None, "Does {0} intend to claim themself?")
-    )
+def is_claiming_self(p): 
+    return(In("bool", "claim_self", p, None, "Does {0} intend to claim themself?"))
 
-#can't prove !is_married without including a spouse, better way? Save married as var?
-#def is_single(p): return(!is_married(person, spouse))
-
-
-def employment_status(p): return(
-    In("str", "employment_status", p, None, "What is {0}'s employment status?")
-    )
+def employment_status(p): 
+    return(In("str", "employment_status", p, None, "What is {0}'s employment status?"))
 
 def wages_from_second_job(p): 
     return In("num", "second_job_wages", p, None, "What was the total sum of wages for {0} from their second job last year?")
@@ -135,11 +216,17 @@ def persons_wages(p):
 def count_of_jobs(p):
     return In("num", "number_of_jobs", p, None, "How many jobs did {0} simultaneously hold last year?")
 
+#certainty < 1, is single single or is single/widowed single?
+def is_single(p):
+    return Or(marital_status(p) == "Single, unmarried, or legally separated", 
+    marital_status(p) == "Widowed (spouse died during the tax year)",
+    marital_status(p) == "Widowed (spouse died before the tax year)")
 
+def has_other_credits(p):
+    return In("bool", "has_other_credits_pub505", p, None, "Does {0} have other credits from Worksheet 1-6 of Pub. 505?")
 
-
-
-
+def other_credits_pub505(p):
+    return In("num", "other_credits_pub505", p, None, "How many other credits does {0} have from Worksheet 1-6 of Pub. 505?")
 
 ################### MOCK RULES ###################
 # Evaluates whether anyone in the household list is eligible for a benefit
