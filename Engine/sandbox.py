@@ -66,11 +66,11 @@ def expedited_app(p):
 # Investigate(['sandbox.another_rule("Neela")'])
 
 
-ts1 = T(traces.TimeSeries([[DawnOfTime, 4], ['2020-01-01', 33]]))
-
-ts2 = T(traces.TimeSeries([[DawnOfTime, 1], ['20000-01-01', 9]]))
-
-print((ts1 + ts2).value)
+# ts1 = T(traces.TimeSeries([[DawnOfTime, 4], ['2020-01-01', 33]]))
+# ts2 = T(traces.TimeSeries([[DawnOfTime, 7], ['2002-01-01', 2]]))
+# print((ts2 * ts1).value)
 
 
-
+ts1 = TrueFrom('2003-01-01')
+# ts2 = T(traces.TimeSeries([[DawnOfTime, 7], ['2002-01-01', 2]]))
+print((ts1).value)

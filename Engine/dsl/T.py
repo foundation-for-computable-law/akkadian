@@ -22,6 +22,7 @@ class T:
             self.ts = False
 
     # Display the value as a string
+    # TODO: Display time series
     def pretty(self):
         return str("Stub" if is_stub(self) else self.value) + " (" + str(round(self.cf * 100)) + "% certain)"
 
@@ -101,33 +102,51 @@ class T:
 
 
 # Internal processing of most binary operators
+# TODO: Catch uncertainty within assessment range for time series
 def process_binary(f, a, b):
-    if is_ts_T(a) and is_ts_T(b):
-        return T(apply_binary_ts_fcn(f, a.value, b.value))
-    elif is_stub(a) or is_stub(b):
-        return Stub(max(get_cf(a), get_cf(b)))
+
+    # Calculate certainty
+    cf = cf_conj(get_cf(a), get_cf(b))
+
+    # Compute the result, based on the object types
+    if is_stub(a) or is_stub(b):
+        return Stub(cf)
     elif is_none(a) or is_none(b):
-        return T(None, max(get_cf(a), get_cf(b)))
+        return T(None, cf)
+    elif is_ts_T(a) or is_ts_T(b):
+        return T(apply_binary_ts_fcn(f, get_val(a), get_val(b)), cf)
     else:
-        return T(f(get_val(a), get_val(b)), get_cf(a) * get_cf(b))
-
-
-# Object is a T whose contents is a time series
-def is_ts_T(a):
-    return type(a) is T and a.ts
+        return T(f(get_val(a), get_val(b)), cf)
 
 
 # Special case for multiplication
 # Short-circuits when one of the values is 0
 def process_binary_mult(a, b):
-    if get_val(a) == 0 or get_val(b) == 0:
-        return T(0, get_cf(a) * get_cf(b))
+
+    # Calculate certainty
+    cf = cf_conj(get_cf(a), get_cf(b))
+
+    # Compute the result, based on the object types
+    if get_val(a) is 0 or get_val(b) is 0:
+        return T(0, cf)
     elif is_stub(a) or is_stub(b):
-        return Stub(get_cf(a) * get_cf(b))
+        return Stub(cf)
     elif is_none(a) or is_none(b):
-        return T(None, max(get_cf(a), get_cf(b)))
+        return T(None, cf)
+    elif is_ts_T(a) or is_ts_T(b):
+        return T(apply_binary_ts_fcn(operator.mul, get_val(a), get_val(b)), cf)
     else:
-        return T(get_val(a) * get_val(b), get_cf(a) * get_cf(b))
+        return T(get_val(a) * get_val(b), cf)
+
+
+# Compute the CF of a conjunction
+def cf_conj(a, b):
+    return a * b
+
+
+# Compute the CF of a disjunction
+def cf_disj(a, b):
+    return a + b - (a * b)
 
 
 # Gets the certainty factor of a T object or scalar
@@ -146,9 +165,17 @@ def get_val(a):
         return a
 
 
+# Object is a T whose contents is a time series
+def is_ts_T(a):
+    return type(a) is T and a.ts
+
+
 # Determines whether an object is a T with a value of None
 def is_none(a):
     return type(a) is T and a.value is None
+
+
+# STUBS
 
 
 # Global variable representing a rule stub
@@ -162,10 +189,7 @@ StubVal = "#stub#"
 
 # Determines whether a T object is a stub
 def is_stub(a):
-    if is_timeseries(a):
-        return False
-    else:
-        return get_val(a) == StubVal
+    return not is_ts_T(a) and get_val(a) == StubVal
 
 
 # LOGIC

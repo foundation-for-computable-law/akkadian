@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 
+from dsl.T import *
 import traces
 
 
@@ -19,13 +20,17 @@ def AddDays(d, n):
 
 
 # Boolean time series that's true starting on a given date, and otherwise false
-# def TrueFrom(dt):
-#     return traces.TimeSeries([[DawnOfTime, False], [dt, True]])
+def TrueFrom(dt):
+    return T(traces.TimeSeries([[DawnOfTime, False], [dt, True]]))
 
 
 # Boolean time series that's true up until a given date, and otherwise false
-# def TrueUntil(dt):
-#     return traces.TimeSeries([[DawnOfTime, True], [AddDays(dt, 1), False]])
+def TrueUntil(dt):
+    return T(traces.TimeSeries([[DawnOfTime, True], [AddDays(dt, 1), False]]))
+
+
+def TS(pairs):
+    return T(traces.TimeSeries(pairs))
 
 
 # Boolean time series that's true between two dates, and otherwise false
