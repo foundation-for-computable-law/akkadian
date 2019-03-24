@@ -58,10 +58,19 @@ def expedited_app(p):
 # is_qualifying_relative("jim","jane").value
 
 # Apply the rules to a fact pattern
-print(Apply_rules(['sandbox.is_qualifying_relative("Jim","Lucy")','sandbox.another_rule("Lucy")']))
+# print(Apply_rules(['sandbox.is_qualifying_relative("Jim","Lucy")','sandbox.another_rule("Lucy")']))
 
 # Initiate an interactive interview
 # Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'],[Fact("assessment_date", None, None, Date(1999,1,1))])
 # Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'])
 # Investigate(['sandbox.another_rule("Neela")'])
+
+
+ts1 = T(traces.TimeSeries([[DawnOfTime, 4], ['2020-01-01', 33]]))
+
+ts2 = T(traces.TimeSeries([[DawnOfTime, 1], ['20000-01-01', 9]]))
+
+print((ts1 + ts2).value)
+
+
 

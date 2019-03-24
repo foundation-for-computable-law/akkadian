@@ -1,5 +1,6 @@
 import functools
 import operator
+from dsl.timeseries import *
 
 
 # T OBJECTS
@@ -7,8 +8,18 @@ import operator
 
 class T:
     def __init__(self, value, cf=1):
+
+        # Substantive content of the object
         self.value = value
-        self.cf = cf  # certainty factor
+
+        # Certainty factor
+        self.cf = cf
+
+        # Time series indicator
+        if type(value) is traces.timeseries.TimeSeries:
+            self.ts = True
+        else:
+            self.ts = False
 
     # Display the value as a string
     def pretty(self):
@@ -91,12 +102,19 @@ class T:
 
 # Internal processing of most binary operators
 def process_binary(f, a, b):
-    if is_stub(a) or is_stub(b):
+    if is_ts_T(a) and is_ts_T(b):
+        return T(apply_binary_ts_fcn(f, a.value, b.value))
+    elif is_stub(a) or is_stub(b):
         return Stub(max(get_cf(a), get_cf(b)))
     elif is_none(a) or is_none(b):
         return T(None, max(get_cf(a), get_cf(b)))
     else:
         return T(f(get_val(a), get_val(b)), get_cf(a) * get_cf(b))
+
+
+# Object is a T whose contents is a time series
+def is_ts_T(a):
+    return type(a) is T and a.ts
 
 
 # Special case for multiplication
@@ -144,7 +162,10 @@ StubVal = "#stub#"
 
 # Determines whether a T object is a stub
 def is_stub(a):
-    return get_val(a) == StubVal
+    if is_timeseries(a):
+        return False
+    else:
+        return get_val(a) == StubVal
 
 
 # LOGIC
