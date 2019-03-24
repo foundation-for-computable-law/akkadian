@@ -1,10 +1,44 @@
 import functools
 import operator
-from dsl.timeseries import *
+import traces
+
+
+# TEMPORAL SUBSTRATE
+
+
+# Lays the foundation for time series processing
+# Much of the heavy lifting is done by the "traces" Python module
+# Most of the functions below serve as wrappers to that module
+
+
+# Time-related constants
+DawnOfTime = '1900-01-01'
+AssessmentStart = '2018-01-01'
+AssessmentEnd = '2020-12-31'
+
+
+# Internal function: Detect whether an object is a time series
+def is_timeseries(a):
+    return type(a) is traces.timeseries.TimeSeries
+
+
+# Apply a binary function to the values in two time series
+def apply_binary_ts_fcn(f, ts1, ts2):
+    return ts1.operation(ts2, lambda x, y: f(x, y))
+
+
+# Apply a unary function to the values in a time series
+def apply_unary_ts_fcn(f, ts):
+    return ts.operation(ts, lambda x, y: f(x))
+
+
+# Instantiate a new time series, given a list of date-value pairs
+def TS(pairs):
+    return T(traces.TimeSeries(pairs))
 
 
 # T OBJECTS
-# Eventually, these will be temporal objects
+
 
 class T:
     def __init__(self, value, cf=1):
@@ -20,11 +54,6 @@ class T:
             self.ts = True
         else:
             self.ts = False
-
-    # Display the value as a string
-    # TODO: Display time series
-    def pretty(self):
-        return str("Stub" if is_stub(self) else self.value) + " (" + str(round(self.cf * 100)) + "% certain)"
 
     # &
     def __and__(self, o):
@@ -206,6 +235,8 @@ def Or(*args):
 def Not(a):
     if is_none(a) or is_stub(a):
         return a
+    elif is_ts_T(a):
+        return T(apply_unary_ts_fcn(Not, a.value), get_cf(a))
     else:
         return T(not get_val(a), get_cf(a))
 
@@ -267,3 +298,11 @@ def If(a, b, c):
             return c
         else:
             return T(c)
+
+
+# Display a T object as a comprehensible string
+def Pretty(a):
+    if is_ts_T(a):
+        return apply_unary_ts_fcn(Pretty, a.value)
+    else:
+        return str("Stub" if is_stub(a) else get_val(a)) + " (" + str(round(get_cf(a) * 100)) + "% certain)"

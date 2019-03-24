@@ -71,6 +71,6 @@ def expedited_app(p):
 # print((ts2 * ts1).value)
 
 
-ts1 = TrueFrom('2003-01-01')
-# ts2 = T(traces.TimeSeries([[DawnOfTime, 7], ['2002-01-01', 2]]))
-print((ts1).value)
+# ts1 = TrueFrom('2003-01-01')
+# ts2 = TrueUntil('2020-03-04')
+# print(Pretty(Not(ts2)))

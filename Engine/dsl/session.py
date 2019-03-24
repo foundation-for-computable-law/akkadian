@@ -83,7 +83,8 @@ def Apply_rules(goals: list, fs=[]):
     return {
         "complete": complete,
         "progress": 1.0 if complete else round(progress, 2),
-        "msg": results[0].pretty(),  # TODO: Generalize to multiple goals
+        # "msg": results[0].pretty(),  # TODO: Generalize to multiple goals
+        "msg": Pretty(results[0]),  # TODO: Generalize to multiple goals
         "results": result_blocks,
         "missing_info": [] if complete else missing_info
     }
@@ -123,6 +124,7 @@ def process_results(result : T):
     return {
         "result": result.value,
         "certainty": result.cf,
-        "msg": result.pretty(),
+        # "msg": result.pretty(),
+        "msg": Pretty(result),
         "complete": result.value is not None
     }

@@ -1,36 +1,22 @@
 from datetime import date, timedelta
 
 from dsl.T import *
-import traces
 
 
-# Note: Dates are represented as strings 'yyyy-mm-dd'
-# result = ts1.merge([ts1,ts2],compact=False, operation=None)
-
-
-# Time-related constants
-DawnOfTime = '1900-01-01'
-AssessmentStart = '2018-01-01'
-AssessmentEnd = '2020-12-31'
-
-
-# NOT TEMPORAL YET
+# Determine the date n dates from a given date
+# TODO: Make temporal; handle uncertainty
 def AddDays(d, n):
     return (date.fromisoformat(d) + timedelta(days=n)).isoformat()
 
 
 # Boolean time series that's true starting on a given date, and otherwise false
 def TrueFrom(dt):
-    return T(traces.TimeSeries([[DawnOfTime, False], [dt, True]]))
+    return TS([[DawnOfTime, False], [dt, True]])
 
 
 # Boolean time series that's true up until a given date, and otherwise false
 def TrueUntil(dt):
     return T(traces.TimeSeries([[DawnOfTime, True], [AddDays(dt, 1), False]]))
-
-
-def TS(pairs):
-    return T(traces.TimeSeries(pairs))
 
 
 # Boolean time series that's true between two dates, and otherwise false
@@ -48,22 +34,10 @@ def TS(pairs):
 #     return ts1.operation(ts2, lambda x, y: x or y)
 
 
-# Time series Boolean NOT function
-# def Not(ts):
-#     return ts.operation(ts, lambda x, y: not x)
-
-
 # Value of a time series on a given date
-# def AsOf(ts, dt):
-#     return ts[dt]
+# TODO: Handle uncertainty
+def AsOf(ts, dt):
+    return ts[dt]
 
 
-# Internal function: Detect whether an object is a time series
-def is_timeseries(a):
-    return type(a) is traces.timeseries.TimeSeries
-
-
-# Apply a binary function to two time series
-def apply_binary_ts_fcn(f, ts1, ts2):
-    return ts1.operation(ts2, lambda x, y: f(x, y))
 
