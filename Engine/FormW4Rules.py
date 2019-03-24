@@ -2,11 +2,13 @@ from dsl import *
 #https://www.irs.gov/pub/irs-pdf/fw4.pdf
 #IRS Form w4(2019) rules
 
+
+############### source rules ###############
 #can we make person/spouse global?
 def personal_allowances_wksheet_complete(person, spouse): return(
         claiming_self(person) + file_married_jointly(person, spouse) + file_head_of_household(person) 
-        + only_job_or_low_wage_second(person, spouse) + child_tax_credit() + credit_for_other_dependents() 
-        + other_credits() 
+        + only_job_or_low_wage_second(person, spouse) + child_tax_credit(person) + credit_for_other_dependents(person) 
+        + other_credits(person) 
     )
 
 
@@ -162,6 +164,7 @@ def other_credits(person):
         return 0
 
 
+############### intermediates ###############
 def spouse_unemployed(s): return(
     employment_status(s) != "Employed"
     )
@@ -180,8 +183,14 @@ def has_only_one_job(person):
         return False
     
 
+#certainty < 1, is single single or is single/widowed single?
+def is_single(p):
+    return Or(marital_status(p) == "Single, unmarried, or legally separated", 
+    marital_status(p) == "Widowed (spouse died during the tax year)",
+    marital_status(p) == "Widowed (spouse died before the tax year)")
 
 
+############### base input rules ###############
 #base level attributes? Can we make these "fall out"?
 def is_married(person, spouse): 
     return marital_status(p) == "Married"
@@ -210,12 +219,6 @@ def persons_wages(p):
 
 def count_of_jobs(p):
     return In("num", "number_of_jobs", p, None, "How many jobs did {0} simultaneously hold last year?")
-
-#certainty < 1, is single single or is single/widowed single?
-def is_single(p):
-    return Or(marital_status(p) == "Single, unmarried, or legally separated", 
-    marital_status(p) == "Widowed (spouse died during the tax year)",
-    marital_status(p) == "Widowed (spouse died before the tax year)")
 
 def has_other_credits(p):
     return In("bool", "has_other_credits_pub505", p, None, "Does {0} have other credits from Worksheet 1-6 of Pub. 505?")
