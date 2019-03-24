@@ -36,7 +36,7 @@ def convert_input(typ: str, val: str):
     elif typ == "num":
         return float(val)
     elif typ == "date":
-        return date.fromisoformat(val)
+        return val
     elif typ == "str":
         return val
     elif typ == "bool":

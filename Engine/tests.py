@@ -86,6 +86,12 @@ class TestDSL(unittest.TestCase):
         self.assertEqual((354 > T(None)).value, None)
         self.assertEqual((T(None) > 34).value, None)
         self.assertEqual((T(None) > T(None)).value, None)
+        self.assertEqual((T('2000-01-01') > T('1999-02-02')).value, True)
+        self.assertEqual((T('2000-01-01') > T('2010-02-02')).value, False)
+        self.assertEqual(('2000-01-01' > T('1999-02-02')).value, True)
+        self.assertEqual(('2000-01-01' > T('2010-02-02')).value, False)
+        self.assertEqual((T('2000-01-01') > '1999-02-02').value, True)
+        self.assertEqual((T('2000-01-01') > '2010-02-02').value, False)
 
     def test_le(self):
         self.assertEqual((T(99) <= T(70)).value, False)
