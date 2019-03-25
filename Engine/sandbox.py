@@ -73,4 +73,6 @@ def expedited_app(p):
 
 # ts1 = TrueFrom('2003-01-01')
 # ts2 = TrueUntil('2020-03-04')
-# print(Pretty(Not(ts2)))
+# ts3 = Or(ts1, ts2)
+#
+print(Pretty(TrueBetween('1999-01-01','2003-02-02')))

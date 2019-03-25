@@ -17,11 +17,6 @@ AssessmentStart = '2018-01-01'
 AssessmentEnd = '2020-12-31'
 
 
-# Internal function: Detect whether an object is a time series
-def is_timeseries(a):
-    return type(a) is traces.timeseries.TimeSeries
-
-
 # Apply a binary function to the values in two time series
 def apply_binary_ts_fcn(f, ts1, ts2):
     return ts1.operation(ts2, lambda x, y: f(x, y))
@@ -168,6 +163,9 @@ def process_binary_mult(a, b):
         return T(get_val(a) * get_val(b), cf)
 
 
+# VALUES AND CFs
+
+
 # Compute the CF of a conjunction
 def cf_conj(a, b):
     return a * b
@@ -194,16 +192,6 @@ def get_val(a):
         return a
 
 
-# Object is a T whose contents is a time series
-def is_ts_T(a):
-    return type(a) is T and a.ts
-
-
-# Determines whether an object is a T with a value of None
-def is_none(a):
-    return type(a) is T and a.value is None
-
-
 # STUBS
 
 
@@ -214,11 +202,6 @@ def Stub(cf=1):
 
 # Used internally to indicate that a T object is a stub
 StubVal = "#stub#"
-
-
-# Determines whether a T object is a stub
-def is_stub(a):
-    return not is_ts_T(a) and get_val(a) == StubVal
 
 
 # LOGIC
@@ -241,11 +224,23 @@ def Not(a):
         return T(not get_val(a), get_cf(a))
 
 
+# DISPLAY
+
+
+# Display a T object as a comprehensible string
+def Pretty(a):
+    if is_ts_T(a):
+        return apply_unary_ts_fcn(Pretty, a.value)
+    else:
+        return str("Stub" if is_stub(a) else get_val(a)) + " (" + str(round(get_cf(a) * 100)) + "% certain)"
+
+
+# INTERNAL METHODS
 # TODO: Make the methods below private, if possible
 
 
 def internal_and(a, b):
-    return more_internal_and(get_val(a), get_val(b), get_cf(a) * get_cf(b))
+    return more_internal_and(get_val(a), get_val(b), cf_conj(get_cf(a), get_cf(b)))
 
 
 def more_internal_and(a, b, cf):
@@ -253,16 +248,16 @@ def more_internal_and(a, b, cf):
         return T(False, cf)
     elif a is None or b is None:
         return T(None, cf)
-    elif is_stub(a) or is_stub(b):
+    elif is_stub_and_not_ts(a) or is_stub_and_not_ts(b):
         return Stub(cf)
+    elif is_timeseries(a) or is_timeseries(b):
+        return T(apply_binary_ts_fcn(And, get_val(a), get_val(b)), cf)
     else:
         return T(True, cf)
 
 
 def internal_or(a, b):
-    cfa = get_cf(a)
-    cfb = get_cf(b)
-    return more_internal_or(get_val(a), get_val(b), cfa + cfb - (cfa * cfb))
+    return more_internal_or(get_val(a), get_val(b), cf_disj(get_cf(a), get_cf(b)))
 
 
 def more_internal_or(a, b, cf):
@@ -270,8 +265,10 @@ def more_internal_or(a, b, cf):
         return T(True, cf)
     elif a is None or b is None:
         return T(None, cf)
-    elif is_stub(a) or is_stub(b):
+    elif is_stub_and_not_ts(a) or is_stub_and_not_ts(b):
         return Stub(cf)
+    elif is_timeseries(a) or is_timeseries(b):
+        return T(apply_binary_ts_fcn(Or, get_val(a), get_val(b)), cf)
     else:
         return T(False, cf)
 
@@ -300,9 +297,29 @@ def If(a, b, c):
             return T(c)
 
 
-# Display a T object as a comprehensible string
-def Pretty(a):
-    if is_ts_T(a):
-        return apply_unary_ts_fcn(Pretty, a.value)
-    else:
-        return str("Stub" if is_stub(a) else get_val(a)) + " (" + str(round(get_cf(a) * 100)) + "% certain)"
+# TYPE TESTING
+
+
+# Internal function: Detect whether an object is a time series
+def is_timeseries(a):
+    return type(a) is traces.timeseries.TimeSeries
+
+
+# Object is a T whose contents is a time series
+def is_ts_T(a):
+    return type(a) is T and a.ts
+
+
+# Determines whether an object is a T with a value of None
+def is_none(a):
+    return type(a) is T and a.value is None
+
+
+# Determines whether a T object is a stub
+def is_stub(a):
+    return not is_ts_T(a) and get_val(a) == StubVal
+
+
+# Determines whether an object is a stub and not a time series
+def is_stub_and_not_ts(a):
+    return not is_timeseries(a) and get_val(a) == StubVal
