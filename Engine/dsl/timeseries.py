@@ -14,12 +14,12 @@ def AddDays(d, n):
 
 # Boolean time series that's true starting on a given date, and otherwise false
 def TrueFrom(dt):
-    return TS([[DawnOfTime, False], [dt, True]])
+    return TS({DawnOfTime: False, dt: True})
 
 
 # Boolean time series that's true up until a given date, and otherwise false
 def TrueUntil(dt):
-    return TS([[DawnOfTime, True], [AddDays(dt, 1), False]])
+    return TS({DawnOfTime: True, AddDays(dt, 1): False})
 
 
 # Boolean time series that's true between two dates, and otherwise false

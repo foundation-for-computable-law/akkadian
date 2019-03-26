@@ -19,17 +19,59 @@ AssessmentEnd = '2020-12-31'
 
 # Apply a binary function to the values in two time series
 def apply_binary_ts_fcn(f, ts1, ts2):
-    return ts1.operation(ts2, lambda x, y: f(x, y))
+    return ts_trim(ts1.operation(ts2, lambda x, y: f(x, y)))
 
 
 # Apply a unary function to the values in a time series
 def apply_unary_ts_fcn(f, ts):
-    return ts.operation(ts, lambda x, y: f(x))
+    return ts_trim(ts.operation(ts, lambda x, y: f(x)))
 
 
 # Instantiate a new time series, given a list of date-value pairs
+# Reduces eternal time series to simple T objects
 def TS(pairs):
-    return T(traces.TimeSeries(pairs))
+    ts = ts_trim(traces.TimeSeries(pairs))
+    if is_eternal_ts(ts):
+        return T(pairs[DawnOfTime])
+    else:
+        return T(ts)
+
+
+# Does a time series start at the dawn of time and have the same value forever?
+def is_eternal_ts(ts: traces.TimeSeries):
+    return ts.n_measurements() == 1 and ts.first_key() == DawnOfTime
+
+
+# Removes redundant intervals from a time series
+# Adapted from the "traces" module's compact() function
+def ts_trim(a: traces.TimeSeries):
+    previous_value = object()
+    redundant = []
+    for time, value in a:
+        if should_be_merged(value, previous_value):
+            redundant.append(time)
+        previous_value = value
+    for time in redundant:
+        del a[time]
+    return a
+
+
+# Determines whether a time series entry is redundant
+def should_be_merged(a, b):
+    if is_stub(a) and is_stub(b):
+        return True
+    elif is_none(a) and is_none(b):
+        return True
+    elif is_scalar(a) and is_scalar(b):
+        return a == b
+    else:
+        return False
+
+
+# Have any None values in the time series been eradicated?
+def ts_is_known(ts: traces.TimeSeries):
+    # Returns False when the time series has a None value, True otherwise
+    return ts.exists()
 
 
 # T OBJECTS
@@ -50,27 +92,6 @@ class T:
         else:
             self.ts = False
 
-    # &
-    def __and__(self, o):
-        return internal_and(self, o)
-
-    def __rand__(self, o):
-        return internal_and(self, o)
-
-    # |
-    def __or__(self, o):
-        return internal_or(self, o)
-
-    def __ror__(self, o):
-        return internal_or(self, o)
-
-    # ~
-    def __invert__(self):
-        if self.value is None:
-            return T(None)
-        else:
-            return T(not self.value, self.cf)
-
     # Arithmetic...
     def __add__(self, o):
         return process_binary(operator.add, self, o)
@@ -79,10 +100,10 @@ class T:
         return process_binary(operator.add, self, o)
 
     def __mul__(self, o):
-        return process_binary_mult(self, o)
+        return process_binary(operator.mul, self, o)
 
     def __rmul__(self, o):
-        return process_binary_mult(self, o)
+        return process_binary(operator.mul, self, o)
 
     def __sub__(self, o):
         return process_binary(operator.sub, self, o)
@@ -108,88 +129,45 @@ class T:
         return process_binary(operator.eq, self, o)
 
     def __ne__(self, o):
-        return ~ (self == o)
+        return Not((self == o))
 
     def __gt__(self, o):
         return process_binary(operator.gt, self, o)
 
-    def __rgt__(self, o):
-        return process_binary(operator.gt, o, self)
-
     def __ge__(self, o):
         return process_binary(operator.ge, self, o)
-
-    def __rge__(self, o):
-        return process_binary(operator.ge, o, self)
 
     # TODO: Add list operators
 
 
 # Internal processing of most binary operators
 # TODO: Catch uncertainty within assessment range for time series
-def process_binary(f, a, b):
+def process_binary(f, a_in, b_in):
 
     # Calculate certainty
-    cf = cf_conj(get_cf(a), get_cf(b))
+    cf = cf_conj(get_cf(a_in), get_cf(b_in))
 
-    # Compute the result, based on the object types
-    if is_stub(a) or is_stub(b):
-        return Stub(cf)
-    elif is_none(a) or is_none(b):
-        return T(None, cf)
-    elif is_ts_T(a) or is_ts_T(b):
-        return T(apply_binary_ts_fcn(f, get_val(a), get_val(b)), cf)
-    else:
-        return T(f(get_val(a), get_val(b)), cf)
+    # Extract the values
+    a = get_val(a_in)
+    b = get_val(b_in)
 
-
-# Special case for multiplication
-# Short-circuits when one of the values is 0
-def process_binary_mult(a, b):
-
-    # Calculate certainty
-    cf = cf_conj(get_cf(a), get_cf(b))
-
-    # Compute the result, based on the object types
-    if get_val(a) is 0 or get_val(b) is 0:
+    # Short-circuit for multiplication by 0
+    if f is operator.mul and (get_val(a) is 0 or get_val(b) is 0):
         return T(0, cf)
-    elif is_stub(a) or is_stub(b):
+
+    # Otherwise, compute the result, based on the object types
+    elif a is StubVal or b is StubVal:
         return Stub(cf)
-    elif is_none(a) or is_none(b):
+    elif a is None or b is None:
         return T(None, cf)
-    elif is_ts_T(a) or is_ts_T(b):
-        return T(apply_binary_ts_fcn(operator.mul, get_val(a), get_val(b)), cf)
+    elif is_timeseries(a) and is_timeseries(b):
+        return T(apply_binary_ts_fcn(lambda x, y: process_binary(f, x, y), a, b), cf)
+    elif is_timeseries(a):
+        return T(apply_binary_ts_fcn(f, a, traces.TimeSeries({DawnOfTime: b})), cf)
+    elif is_timeseries(b):
+        return T(apply_binary_ts_fcn(f, traces.TimeSeries({DawnOfTime: a}), b), cf)
     else:
-        return T(get_val(a) * get_val(b), cf)
-
-
-# VALUES AND CFs
-
-
-# Compute the CF of a conjunction
-def cf_conj(a, b):
-    return a * b
-
-
-# Compute the CF of a disjunction
-def cf_disj(a, b):
-    return a + b - (a * b)
-
-
-# Gets the certainty factor of a T object or scalar
-def get_cf(a):
-    if type(a) is T:
-        return a.cf
-    else:
-        return 1
-
-
-# Gets the value of a T object or scalar
-def get_val(a):
-    if type(a) is T:
-        return a.value
-    else:
-        return a
+        return T(f(a, b), cf)
 
 
 # STUBS
@@ -235,23 +213,60 @@ def Pretty(a):
         return str("Stub" if is_stub(a) else get_val(a)) + " (" + str(round(get_cf(a) * 100)) + "% certain)"
 
 
+# *******************************************************
 # INTERNAL METHODS
 # TODO: Make the methods below private, if possible
+# *******************************************************
+
+
+# VALUES AND CFs
+
+
+# Compute the CF of a conjunction
+def cf_conj(a, b):
+    return a * b
+
+
+# Compute the CF of a disjunction
+def cf_disj(a, b):
+    return a + b - (a * b)
+
+
+# Gets the certainty factor of a T object or scalar
+def get_cf(a):
+    if type(a) is T:
+        return a.cf
+    else:
+        return 1
+
+
+# Gets the value of a T object or scalar
+def get_val(a):
+    if type(a) is T:
+        return a.value
+    else:
+        return a
 
 
 def internal_and(a, b):
     return more_internal_and(get_val(a), get_val(b), cf_conj(get_cf(a), get_cf(b)))
 
 
+# Boolean AND logic
+# None of the inputs are T objects
 def more_internal_and(a, b, cf):
     if a is False or b is False:
         return T(False, cf)
+    elif a is True:
+        return T(b, cf)
+    elif b is True:
+        return T(a, cf)
+    elif is_timeseries(a) or is_timeseries(b):
+        return T(apply_binary_ts_fcn(And, get_val(a), get_val(b)), cf)
     elif a is None or b is None:
         return T(None, cf)
     elif is_stub_and_not_ts(a) or is_stub_and_not_ts(b):
         return Stub(cf)
-    elif is_timeseries(a) or is_timeseries(b):
-        return T(apply_binary_ts_fcn(And, get_val(a), get_val(b)), cf)
     else:
         return T(True, cf)
 
@@ -260,15 +275,21 @@ def internal_or(a, b):
     return more_internal_or(get_val(a), get_val(b), cf_disj(get_cf(a), get_cf(b)))
 
 
+# Boolean OR logic
+# None of the inputs are T objects
 def more_internal_or(a, b, cf):
     if a is True or b is True:
         return T(True, cf)
+    elif a is False:
+        return T(b, cf)
+    elif b is False:
+        return T(a, cf)
+    elif is_timeseries(a) or is_timeseries(b):
+        return T(apply_binary_ts_fcn(Or, get_val(a), get_val(b)), cf)
     elif a is None or b is None:
         return T(None, cf)
     elif is_stub_and_not_ts(a) or is_stub_and_not_ts(b):
         return Stub(cf)
-    elif is_timeseries(a) or is_timeseries(b):
-        return T(apply_binary_ts_fcn(Or, get_val(a), get_val(b)), cf)
     else:
         return T(False, cf)
 
@@ -312,7 +333,7 @@ def is_ts_T(a):
 
 # Determines whether an object is a T with a value of None
 def is_none(a):
-    return type(a) is T and a.value is None
+    return (type(a) is T and a.value is None) or a is None
 
 
 # Determines whether a T object is a stub
@@ -323,3 +344,7 @@ def is_stub(a):
 # Determines whether an object is a stub and not a time series
 def is_stub_and_not_ts(a):
     return not is_timeseries(a) and get_val(a) == StubVal
+
+# Determines whether an object is a scalar
+def is_scalar(a):
+    return type(a) is not T and type(a) is not None and not is_timeseries(a)

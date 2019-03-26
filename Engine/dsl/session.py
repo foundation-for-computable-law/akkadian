@@ -70,11 +70,12 @@ def Apply_rules(goals: list, fs=[]):
     progress = len(facts) / max(len(facts) + len(missing_info), 1)
 
     # Have all of the goals been determined?
-    complete = all(map(lambda x : x.value is not None, results))
+    # complete = all(map(lambda x: x.value is not None, results))
+    complete = all(map(lambda x: goal_is_determined(x), results))
 
     # For each result, format it as a dictionary
     # TODO: In each dictionary, include the function name that was being called
-    result_blocks = list(map(lambda x : process_results(x), results))
+    result_blocks = list(map(lambda x: process_results(x), results))
 
     # Housekeeping
     facts.clear()
@@ -83,11 +84,18 @@ def Apply_rules(goals: list, fs=[]):
     return {
         "complete": complete,
         "progress": 1.0 if complete else round(progress, 2),
-        # "msg": results[0].pretty(),  # TODO: Generalize to multiple goals
         "msg": Pretty(results[0]),  # TODO: Generalize to multiple goals
         "results": result_blocks,
         "missing_info": [] if complete else missing_info
     }
+
+
+# Determines whether a goal has been determined such that the interview can stop
+def goal_is_determined(goal: T):
+    if is_ts_T(goal):
+        return ts_is_known(goal.value)
+    else:
+        return goal.value is not None
 
 
 # Gets the value for a fact

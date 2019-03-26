@@ -16,10 +16,20 @@ def is_qualifying_relative(a, b):
 
 def another_rule(p):
     return Or(expedited_app(p),
+              hourly_wage(p) < fed_min_wage(),
               assessment_date() > Now,
               age(p) >= 12,
               citizenship(p) == "U.S. Citizen")
 
+
+# Federal minimum wage for all covered, nonexempt workers
+# Source: https://www.dol.gov/whd/minwage/chart.htm
+def fed_min_wage():
+    return TS({DawnOfTime: Stub(),
+               '1997-09-01': 5.15,
+               '2007-07-24': 5.85,
+               '2008-07-24': 6.55,
+               '2009-07-24': 7.25})
 
 # FACTS
 
@@ -47,6 +57,9 @@ def expedited_app(p):
     return In("bool", "expedited_app", p, None, "Does {0} require an expedited application?")
 
 
+def hourly_wage(p):
+    return In("num", "hourly_wage", p, None, "How much is {0} paid per hour?")
+
 # USAGE
 
 
@@ -63,16 +76,4 @@ def expedited_app(p):
 # Initiate an interactive interview
 # Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'],[Fact("assessment_date", None, None, Date(1999,1,1))])
 # Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'])
-# Investigate(['sandbox.another_rule("Neela")'])
-
-
-# ts1 = T(traces.TimeSeries([[DawnOfTime, 4], ['2020-01-01', 33]]))
-# ts2 = T(traces.TimeSeries([[DawnOfTime, 7], ['2002-01-01', 2]]))
-# print((ts2 * ts1).value)
-
-
-# ts1 = TrueFrom('2003-01-01')
-# ts2 = TrueUntil('2020-03-04')
-# ts3 = Or(ts1, ts2)
-#
-print(Pretty(TrueBetween('1999-01-01','2003-02-02')))
+Investigate(['sandbox.another_rule("Neela")'])

@@ -268,6 +268,177 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(ForAll(lambda x: x > 6, T([3, 5, 8])).value, False)
         self.assertEqual(ForAll(lambda x: x > 1, T([3, 5, 8])).value, True)
 
+    def test_ts_trim(self):
+        self.assertEqual(ts_trim(traces.TimeSeries({DawnOfTime: False, '2020-01-01': True, '2021-01-01': True})),
+                         traces.TimeSeries({DawnOfTime: False, '2020-01-01': True}))
+        self.assertEqual(ts_trim(traces.TimeSeries({DawnOfTime: False, '2020-01-01': Stub(), '2021-01-01': Stub()})),
+                         traces.TimeSeries({DawnOfTime: False, '2020-01-01': Stub()}))
+        self.assertEqual(ts_trim(traces.TimeSeries({DawnOfTime: False, '2020-01-01': None, '2021-01-01': None})),
+                         traces.TimeSeries({DawnOfTime: False, '2020-01-01': None}))
+        self.assertEqual(ts_trim(traces.TimeSeries({DawnOfTime: 3, '2020-01-01': 4, '2021-01-01': 4.0})),
+                         traces.TimeSeries({DawnOfTime: 3, '2020-01-01': 4}))
+
+    # Constructing time series
+    def test_ts_construction_1(self):
+        self.assertEqual(TrueFrom('2020-01-01').value,
+                         TS({DawnOfTime: False, '2020-01-01': True}).value)
+
+    def test_ts_construction_2(self):
+        self.assertEqual(TrueUntil('2020-01-01').value,
+                         TS({DawnOfTime: True, '2020-01-02': False}).value)
+
+    def test_ts_construction_3(self):
+        self.assertEqual(TrueBetween('2020-01-01', '2021-01-01').value,
+                         TS({DawnOfTime: False, '2020-01-01': True, '2021-01-02': False}).value)
+
+    def test_ts_construction_4(self):
+        self.assertEqual(TS({DawnOfTime: False, '2020-01-01': True, '2021-01-01': True}).value,
+                         TS({DawnOfTime: False, '2020-01-01': True}).value)
+
+    # Time series AND
+    def test_ts_and_1(self):
+        self.assertEqual(And(tsbool1, tsbool2).value,
+                         TS({DawnOfTime: False,
+                             '2020-01-01': True,
+                             '2021-01-01': None,
+                             '2023-01-01': False,
+                             '2024-01-01': None}).value)
+
+    def test_ts_and_2(self):
+        self.assertEqual(Pretty(And(tsbool2, Stub())),
+                         Pretty(TS({DawnOfTime: Stub(),
+                                    '2023-01-01': False,
+                                    '2024-01-01': Stub()})))
+
+    def test_ts_and_3(self):
+        self.assertEqual(Pretty(And(tsbool1, Stub())),
+                         Pretty(TS({DawnOfTime: False,
+                                    '2020-01-01': Stub(),
+                                    '2021-01-01': None})))
+
+    def test_ts_and_4(self):
+        self.assertEqual(Pretty(And(True,
+                                    TS({'1900-01-01': Stub(),
+                                        '1997-09-01': False,
+                                        '2008-07-24': True}))),
+                         Pretty(TS({'1900-01-01': Stub(),
+                                    '1997-09-01': False,
+                                    '2008-07-24': True})))
+
+    def test_ts_and_5(self):
+        self.assertEqual(Pretty(And(False,
+                                    TS({'1900-01-01': Stub(),
+                                        '1997-09-01': False,
+                                        '2008-07-24': True}))),
+                         Pretty(T(False)))
+
+    # Time series OR
+    def test_ts_or_1(self):
+        self.assertEqual(Pretty(Or(tsbool1, tsbool2)),
+                         Pretty(TS({DawnOfTime: True,
+                                    '2023-01-01': None})))
+
+    def test_ts_or_2(self):
+        self.assertEqual(Pretty(Or(tsbool2, Stub())),
+                         Pretty(TS({DawnOfTime: True,
+                                    '2023-01-01': Stub()})))
+
+    def test_ts_or_3(self):
+        self.assertEqual(Pretty(Or(tsbool1, Stub())),
+                         Pretty(TS({DawnOfTime: Stub(),
+                                    '2020-01-01': True,
+                                    '2021-01-01': None})))
+
+    def test_ts_or_4(self):
+        self.assertEqual(Pretty(Or(T(False),
+                                   TS({'1900-01-01': Stub(),
+                                       '1997-09-01': False,
+                                       '2008-07-24': True}))),
+                         Pretty(TS({'1900-01-01': Stub(),
+                                    '1997-09-01': False,
+                                    '2008-07-24': True})))
+
+    def test_ts_or_5(self):
+        self.assertEqual(Pretty(Or(False,
+                                   TS({'1900-01-01': Stub(),
+                                       '1997-09-01': False,
+                                       '2008-07-24': True}))),
+                         Pretty(TS({'1900-01-01': Stub(),
+                                    '1997-09-01': False,
+                                    '2008-07-24': True})))
+
+    def test_ts_or_6(self):
+        self.assertEqual(Pretty(Or(True,
+                                   TS({'1900-01-01': Stub(),
+                                       '1997-09-01': False,
+                                       '2008-07-24': True}))),
+                         Pretty(T(True)))
+
+    # Time series NOT
+    def test_ts_not_1(self):
+        self.assertEqual(Pretty(Not(tsbool1)),
+                         Pretty(TS({DawnOfTime: True, '2020-01-01': False, '2021-01-01': None})))
+
+    def test_ts_not_2(self):
+        self.assertEqual(Pretty(Not(tsbool2)),
+                         Pretty(TS({DawnOfTime: False, '2023-01-01': True, '2024-01-01': Stub()})))
+
+    # Time series addition
+    def test_ts_add_1(self):
+        self.assertEqual(Pretty(tsnum1 + tsnum2),
+                         Pretty(TS({DawnOfTime: 28,
+                                    '2020-01-01': 32,
+                                    '2021-01-01': None,
+                                    '2024-01-01': Stub()})))
+
+    # Time series subtraction
+    def test_ts_sub_1(self):
+        self.assertEqual(Pretty(tsnum1 - tsnum2),
+                         Pretty(TS({DawnOfTime: -20,
+                                    '2020-01-01': -16,
+                                    '2021-01-01': None,
+                                    '2024-01-01': Stub()})))
+
+    # Time series multiplication
+    def test_ts_mult_1(self):
+        self.assertEqual(Pretty(tsnum1 * tsnum2),
+                         Pretty(TS({DawnOfTime: 96,
+                                    '2020-01-01': 192,
+                                    '2021-01-01': None,
+                                    '2024-01-01': Stub()})))
+
+    def test_ts_mult_2(self):
+        self.assertEqual(Pretty(tsnum1 * 0),
+                         Pretty(T(0)))
+
+    def test_ts_mult_3(self):
+        self.assertEqual(Pretty(TS({DawnOfTime: 0, '2020-01-01': 8}) * 5),
+                         Pretty(TS({DawnOfTime: 0, '2020-01-01': 40})))
+
+    # Equality of two time series
+    def test_ts_eq_1(self):
+        self.assertEqual(Pretty(tsnum1 == tsnum2),
+                         Pretty(TS({DawnOfTime: False,
+                                    '2021-01-01': None,
+                                    '2024-01-01': Stub()})))
+
+    def test_ts_eq_2(self):
+        self.assertEqual(Pretty(TS({DawnOfTime: 5}) == T(5)),
+                         Pretty(T(True)))
+
+    # Time series comparison
+    def test_ts_cmp_1(self):
+        self.assertEqual(Pretty(TS({DawnOfTime: 4, '2020-01-01': 8}) > 5),
+                         Pretty(TS({DawnOfTime: False,
+                                    '2020-01-01': True})))
+
+
+# Used to test time series logic
+tsbool1 = TS({DawnOfTime: False, '2020-01-01': True, '2021-01-01': None})
+tsbool2 = TS({DawnOfTime: True, '2023-01-01': False, '2024-01-01': Stub()})
+tsnum1 = TS({DawnOfTime: 4, '2020-01-01': 8, '2021-01-01': None})
+tsnum2 = TS({DawnOfTime: 24, '2023-01-01': 3, '2024-01-01': Stub()})
+
 
 if __name__ == '__main__':
     unittest.main()
