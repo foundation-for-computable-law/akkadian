@@ -144,30 +144,42 @@ class T:
 # TODO: Catch uncertainty within assessment range for time series
 def process_binary(f, a_in, b_in):
 
-    # Calculate certainty
-    cf = cf_conj(get_cf(a_in), get_cf(b_in))
-
-    # Extract the values
+    # Extract the values and CFs
     a = get_val(a_in)
     b = get_val(b_in)
+    cfa = get_cf(a_in)
+    cfb = get_cf(b_in)
 
     # Short-circuit for multiplication by 0
-    if f is operator.mul and (get_val(a) is 0 or get_val(b) is 0):
-        return T(0, cf)
+    if f is operator.mul and (a is 0 or b is 0):
+        if a is 0 and b is 0:
+            return T(0, max(cfa, cfb))
+        elif a is 0:
+            return T(0, cfa)
+        else:
+            return T(0, cfb)
 
     # Otherwise, compute the result, based on the object types
-    elif a is StubVal or b is StubVal:
-        return Stub(cf)
-    elif a is None or b is None:
-        return T(None, cf)
+    elif a is StubVal and b is StubVal:
+        return Stub(max(cfa, cfb))
+    elif a is StubVal:
+        return Stub(cfa)
+    elif b is StubVal:
+        return Stub(cfb)
+    elif a is None and b is None:
+        return T(None, max(cfa, cfb))
+    elif a is None:
+        return T(None, cfa)
+    elif b is None:
+        return T(None, cfb)
     elif is_timeseries(a) and is_timeseries(b):
-        return T(apply_binary_ts_fcn(lambda x, y: process_binary(f, x, y), a, b), cf)
+        return T(apply_binary_ts_fcn(lambda x, y: process_binary(f, x, y), a, b), 1) # TODO: CF?
     elif is_timeseries(a):
-        return T(apply_binary_ts_fcn(f, a, traces.TimeSeries({DawnOfTime: b})), cf)
+        return T(apply_binary_ts_fcn(f, a, traces.TimeSeries({DawnOfTime: b})), 1) # TODO: CF?
     elif is_timeseries(b):
-        return T(apply_binary_ts_fcn(f, traces.TimeSeries({DawnOfTime: a}), b), cf)
+        return T(apply_binary_ts_fcn(f, traces.TimeSeries({DawnOfTime: a}), b), 1) # TODO: CF?
     else:
-        return T(f(a, b), cf)
+        return T(f(a, b), min(cfa, cfb))
 
 
 # STUBS
@@ -222,16 +234,6 @@ def Pretty(a):
 # VALUES AND CFs
 
 
-# Compute the CF of a conjunction
-def cf_conj(a, b):
-    return a * b
-
-
-# Compute the CF of a disjunction
-def cf_disj(a, b):
-    return a + b - (a * b)
-
-
 # Gets the certainty factor of a T object or scalar
 def get_cf(a):
     if type(a) is T:
@@ -249,56 +251,73 @@ def get_val(a):
 
 
 def internal_and(a, b):
-    return more_internal_and(get_val(a), get_val(b), cf_conj(get_cf(a), get_cf(b)))
+    return more_internal_and(get_val(a), get_val(b), get_cf(a), get_cf(b))
 
 
 # Boolean AND logic
 # None of the inputs are T objects
-def more_internal_and(a, b, cf):
-    if a is False or b is False:
-        return T(False, cf)
+def more_internal_and(a, b, cfa, cfb):
+    if a is False and b is False:
+        return T(False, max(cfa, cfb))
+    elif a is False:
+        return T(False, cfa)
+    elif b is False:
+        return T(False, cfb)
+    elif a is True and b is True:
+        return T(True, min(cfa, cfb))
     elif a is True:
-        return T(b, cf)
+        return T(b, cfb)
     elif b is True:
-        return T(a, cf)
+        return T(a, cfa)
     elif is_timeseries(a) or is_timeseries(b):
-        return T(apply_binary_ts_fcn(And, get_val(a), get_val(b)), cf)
-    elif a is None or b is None:
-        return T(None, cf)
-    elif is_stub_and_not_ts(a) or is_stub_and_not_ts(b):
-        return Stub(cf)
+        return T(apply_binary_ts_fcn(And, get_val(a), get_val(b)), 1) # TODO: CF?
+    elif a is None and b is None:
+        return T(None, max(cfa, cfb))
+    elif a is None:
+        return T(None, cfa)
+    elif b is None:
+        return T(None, cfb)
     else:
-        return T(True, cf)
+        return T(Stub(), max(cfa, cfb))
 
 
 def internal_or(a, b):
-    return more_internal_or(get_val(a), get_val(b), cf_disj(get_cf(a), get_cf(b)))
+    return more_internal_or(get_val(a), get_val(b), get_cf(a), get_cf(b))
 
 
 # Boolean OR logic
 # None of the inputs are T objects
-def more_internal_or(a, b, cf):
-    if a is True or b is True:
-        return T(True, cf)
+def more_internal_or(a, b, cfa, cfb):
+    if a is True and b is True:
+        return T(True, max(cfa, cfb))
+    elif a is True:
+        return T(True, cfa)
+    elif b is True:
+        return T(True, cfb)
+    elif a is False and b is False:
+        return T(False, min(cfa, cfb))
     elif a is False:
-        return T(b, cf)
+        return T(b, cfb)
     elif b is False:
-        return T(a, cf)
+        return T(a, cfa)
     elif is_timeseries(a) or is_timeseries(b):
-        return T(apply_binary_ts_fcn(Or, get_val(a), get_val(b)), cf)
-    elif a is None or b is None:
-        return T(None, cf)
-    elif is_stub_and_not_ts(a) or is_stub_and_not_ts(b):
-        return Stub(cf)
+        return T(apply_binary_ts_fcn(Or, get_val(a), get_val(b)), 1) # TODO: CF?
+    elif a is None and b is None:
+        return T(None, max(cfa, cfb))
+    elif a is None:
+        return T(None, cfa)
+    elif b is None:
+        return T(None, cfb)
     else:
-        return T(False, cf)
+        return T(Stub(), max(cfa, cfb))
 
 
 # CONDITIONALS
 
 
+# TODO: Allow an arbitrary number of arguments
 # TODO: Implement lazy evaluation so args b and c are only invoked as needed
-# TODO: Finish implementing certainty factors
+# TODO: Implement certainty factors
 def If(a, b, c):
     if is_none(a) or is_stub(a):
         return a
