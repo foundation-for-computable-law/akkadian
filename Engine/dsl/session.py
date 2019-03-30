@@ -1,6 +1,6 @@
 from datetime import date
 from dsl.facts import *
-from dsl.T import *
+from dsl.V import *
 
 
 # Generates an interactive interview to collect info to resolve a goal
@@ -40,7 +40,7 @@ def convert_input(typ: str, val: str):
     elif typ == "str":
         return val
     elif typ == "bool":
-        if val in ("true", "True", "T", "t", "yes", "y"):
+        if val in ("true", "True", "V", "t", "yes", "y"):
             return True
         else:
             return False
@@ -91,8 +91,8 @@ def Apply_rules(goals: list, fs=[]):
 
 
 # Determines whether a goal has been determined such that the interview can stop
-def goal_is_determined(goal: T):
-    if is_ts_T(goal):
+def goal_is_determined(goal: V):
+    if is_ts_V(goal):
         return ts_is_known(goal.value)
     else:
         return goal.value is not None
@@ -112,11 +112,11 @@ def In(typ: str, name: str, subj, obj, question=None):
             missing_info.append([typ, name, subj, obj, text_subst(subj, obj, question)])
 
         # Indicate lack of knowledge
-        return T(None)
+        return V(None)
 
     # If the fact is known, return its value
     else:
-        return T(lookup[0].value)
+        return V(lookup[0].value)
 
 
 # Substitute the subject ({0}) and object ({1}) of a fact into the question text
@@ -127,8 +127,8 @@ def text_subst(sbj: str, obj: str, question: str):
         return question.format(sbj, obj) + " "
 
 
-# Given a T object, format its values into a dictionary
-def process_results(result : T):
+# Given a V object, format its values into a dictionary
+def process_results(result : V):
     return {
         "result": result.value,
         "certainty": result.cf,

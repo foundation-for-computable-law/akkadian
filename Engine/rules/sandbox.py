@@ -76,6 +76,6 @@ def hourly_wage(p):
 # Initiate an interactive interview
 # Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'],[Fact("assessment_date", None, None, Date(1999,1,1))])
 # Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'])
-#Investigate(['sandbox.another_rule("Neela")'])
+Investigate(['sandbox.another_rule("Neela")'])
 
-print(Pretty(fed_min_wage()))
+# print(Pretty(fed_min_wage()))

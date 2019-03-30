@@ -28,13 +28,13 @@ def apply_unary_ts_fcn(f, ts):
 
 
 # Instantiate a new time series, given a list of date-value pairs
-# Reduces eternal time series to simple T objects
+# Reduces eternal time series to simple V objects
 def TS(pairs):
     ts = ts_trim(traces.TimeSeries(pairs))
     if is_eternal_ts(ts):
-        return T(pairs[DawnOfTime])
+        return V(pairs[DawnOfTime])
     else:
-        return T(ts)
+        return V(ts)
 
 
 # Does a time series start at the dawn of time and have the same value forever?
@@ -74,10 +74,10 @@ def ts_is_known(ts: traces.TimeSeries):
     return ts.exists()
 
 
-# T OBJECTS
+# V OBJECTS
 
 
-class T:
+class V:
     def __init__(self, value, cf=1):
 
         # Substantive content of the object
@@ -153,11 +153,11 @@ def process_binary(f, a_in, b_in):
     # Short-circuit for multiplication by 0
     if f is operator.mul and (a is 0 or b is 0):
         if a is 0 and b is 0:
-            return T(0, max(cfa, cfb))
+            return V(0, max(cfa, cfb))
         elif a is 0:
-            return T(0, cfa)
+            return V(0, cfa)
         else:
-            return T(0, cfb)
+            return V(0, cfb)
 
     # Otherwise, compute the result, based on the object types
     elif a is StubVal and b is StubVal:
@@ -167,19 +167,19 @@ def process_binary(f, a_in, b_in):
     elif b is StubVal:
         return Stub(cfb)
     elif a is None and b is None:
-        return T(None, max(cfa, cfb))
+        return V(None, max(cfa, cfb))
     elif a is None:
-        return T(None, cfa)
+        return V(None, cfa)
     elif b is None:
-        return T(None, cfb)
+        return V(None, cfb)
     elif is_timeseries(a) and is_timeseries(b):
-        return T(apply_binary_ts_fcn(lambda x, y: process_binary(f, x, y), a, b), 1) # TODO: CF?
+        return V(apply_binary_ts_fcn(lambda x, y: process_binary(f, x, y), a, b), 1) # TODO: CF?
     elif is_timeseries(a):
-        return T(apply_binary_ts_fcn(f, a, traces.TimeSeries({DawnOfTime: b})), 1) # TODO: CF?
+        return V(apply_binary_ts_fcn(f, a, traces.TimeSeries({DawnOfTime: b})), 1) # TODO: CF?
     elif is_timeseries(b):
-        return T(apply_binary_ts_fcn(f, traces.TimeSeries({DawnOfTime: a}), b), 1) # TODO: CF?
+        return V(apply_binary_ts_fcn(f, traces.TimeSeries({DawnOfTime: a}), b), 1) # TODO: CF?
     else:
-        return T(f(a, b), min(cfa, cfb))
+        return V(f(a, b), min(cfa, cfb))
 
 
 # STUBS
@@ -187,10 +187,10 @@ def process_binary(f, a_in, b_in):
 
 # Global variable representing a rule stub
 def Stub(cf=1):
-    return T(StubVal, cf)
+    return V(StubVal, cf)
 
 
-# Used internally to indicate that a T object is a stub
+# Used internally to indicate that a V object is a stub
 StubVal = "#stub#"
 
 
@@ -208,18 +208,18 @@ def Or(*args):
 def Not(a):
     if is_none(a) or is_stub(a):
         return a
-    elif is_ts_T(a):
-        return T(apply_unary_ts_fcn(Not, a.value), get_cf(a))
+    elif is_ts_V(a):
+        return V(apply_unary_ts_fcn(Not, a.value), get_cf(a))
     else:
-        return T(not get_val(a), get_cf(a))
+        return V(not get_val(a), get_cf(a))
 
 
 # DISPLAY
 
 
-# Display a T object as a comprehensible string
+# Display a V object as a comprehensible string
 def Pretty(a):
-    if is_ts_T(a):
+    if is_ts_V(a):
         return apply_unary_ts_fcn(Pretty, a.value)
     else:
         return str("Stub" if is_stub(a) else get_val(a)) + " (" + str(round(get_cf(a) * 100)) + "% certain)"
@@ -234,17 +234,17 @@ def Pretty(a):
 # VALUES AND CFs
 
 
-# Gets the certainty factor of a T object or scalar
+# Gets the certainty factor of a V object or scalar
 def get_cf(a):
-    if type(a) is T:
+    if type(a) is V:
         return a.cf
     else:
         return 1
 
 
-# Gets the value of a T object or scalar
+# Gets the value of a V object or scalar
 def get_val(a):
-    if type(a) is T:
+    if type(a) is V:
         return a.value
     else:
         return a
@@ -255,30 +255,30 @@ def internal_and(a, b):
 
 
 # Boolean AND logic
-# None of the inputs are T objects
+# None of the inputs are V objects
 def more_internal_and(a, b, cfa, cfb):
     if a is False and b is False:
-        return T(False, max(cfa, cfb))
+        return V(False, max(cfa, cfb))
     elif a is False:
-        return T(False, cfa)
+        return V(False, cfa)
     elif b is False:
-        return T(False, cfb)
+        return V(False, cfb)
     elif a is True and b is True:
-        return T(True, min(cfa, cfb))
+        return V(True, min(cfa, cfb))
     elif a is True:
-        return T(b, cfb)
+        return V(b, cfb)
     elif b is True:
-        return T(a, cfa)
+        return V(a, cfa)
     elif is_timeseries(a) or is_timeseries(b):
-        return T(apply_binary_ts_fcn(And, get_val(a), get_val(b)), 1) # TODO: CF?
+        return V(apply_binary_ts_fcn(And, get_val(a), get_val(b)), 1) # TODO: CF?
     elif a is None and b is None:
-        return T(None, max(cfa, cfb))
+        return V(None, max(cfa, cfb))
     elif a is None:
-        return T(None, cfa)
+        return V(None, cfa)
     elif b is None:
-        return T(None, cfb)
+        return V(None, cfb)
     else:
-        return T(Stub(), max(cfa, cfb))
+        return V(Stub(), max(cfa, cfb))
 
 
 def internal_or(a, b):
@@ -286,30 +286,30 @@ def internal_or(a, b):
 
 
 # Boolean OR logic
-# None of the inputs are T objects
+# None of the inputs are V objects
 def more_internal_or(a, b, cfa, cfb):
     if a is True and b is True:
-        return T(True, max(cfa, cfb))
+        return V(True, max(cfa, cfb))
     elif a is True:
-        return T(True, cfa)
+        return V(True, cfa)
     elif b is True:
-        return T(True, cfb)
+        return V(True, cfb)
     elif a is False and b is False:
-        return T(False, min(cfa, cfb))
+        return V(False, min(cfa, cfb))
     elif a is False:
-        return T(b, cfb)
+        return V(b, cfb)
     elif b is False:
-        return T(a, cfa)
+        return V(a, cfa)
     elif is_timeseries(a) or is_timeseries(b):
-        return T(apply_binary_ts_fcn(Or, get_val(a), get_val(b)), 1) # TODO: CF?
+        return V(apply_binary_ts_fcn(Or, get_val(a), get_val(b)), 1) # TODO: CF?
     elif a is None and b is None:
-        return T(None, max(cfa, cfb))
+        return V(None, max(cfa, cfb))
     elif a is None:
-        return T(None, cfa)
+        return V(None, cfa)
     elif b is None:
-        return T(None, cfb)
+        return V(None, cfb)
     else:
-        return T(Stub(), max(cfa, cfb))
+        return V(Stub(), max(cfa, cfb))
 
 
 # CONDITIONALS
@@ -322,19 +322,19 @@ def If(a, b, c):
     if is_none(a) or is_stub(a):
         return a
     #if get_val(a) is None:
-    #    return T(None, get_cf(a))
+    #    return V(None, get_cf(a))
     #elif is_stub(a):
     #    return a
     elif get_val(a):
-        if type(b) is T:
+        if type(b) is V:
             return b
         else:
-            return T(b)
+            return V(b)
     else:
-        if type(c) is T:
+        if type(c) is V:
             return c
         else:
-            return T(c)
+            return V(c)
 
 
 # TYPE TESTING
@@ -345,19 +345,19 @@ def is_timeseries(a):
     return type(a) is traces.timeseries.TimeSeries
 
 
-# Object is a T whose contents is a time series
-def is_ts_T(a):
-    return type(a) is T and a.ts
+# Object is a V whose contents is a time series
+def is_ts_V(a):
+    return type(a) is V and a.ts
 
 
-# Determines whether an object is a T with a value of None
+# Determines whether an object is a V with a value of None
 def is_none(a):
-    return (type(a) is T and a.value is None) or a is None
+    return (type(a) is V and a.value is None) or a is None
 
 
-# Determines whether a T object is a stub
+# Determines whether a V object is a stub
 def is_stub(a):
-    return not is_ts_T(a) and get_val(a) == StubVal
+    return not is_ts_V(a) and get_val(a) == StubVal
 
 
 # Determines whether an object is a stub and not a time series
@@ -366,4 +366,4 @@ def is_stub_and_not_ts(a):
 
 # Determines whether an object is a scalar
 def is_scalar(a):
-    return type(a) is not T and type(a) is not None and not is_timeseries(a)
+    return type(a) is not V and type(a) is not None and not is_timeseries(a)
