@@ -1,5 +1,7 @@
 from datetime import date, timedelta
 
+import pandas as pd
+
 from dsl.V import *
 
 
@@ -37,4 +39,9 @@ def AsOf(ts, dt):
     return ts[dt]
 
 
+# TIME SERIES COMPONENTS
 
+
+def DateRange(start=None, end=None, periods=None, freq=None):
+    return list(map(lambda x: x.date().isoformat(),
+                    pd.date_range(start=start, end=end, periods=periods, freq=freq).to_pydatetime()))
