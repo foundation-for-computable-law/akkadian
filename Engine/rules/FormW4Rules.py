@@ -252,25 +252,22 @@ def two_earners_mult_jobs_wksht_required(person, spouse):
     # 
     # and the combined earnings from all jobs exceed $53,000 ($24,450 if married filing jointly), see the
     # Two-Earners/Multiple Jobs Worksheet on page 4 to avoid having too little tax withheld.  
-    If(Or(two_earners_mult_jobs_wksht_required_single(person), two_earners_mult_jobs_wksht_required_couple(person, spouse))):
-        return True
-    Else:
-        return False
+    If(
+        Or(two_earners_mult_jobs_wksht_required_single(person), two_earners_mult_jobs_wksht_required_couple(person, spouse)),
+        True, False):
+
 
 def two_earners_mult_jobs_wksht_required_single(person):
-    If(count_of_jobs(person) > 1, total_income(person) > 53000):
-        return True
-    Else:
-        return False
+    If(And(count_of_jobs(person) > 1, total_income(person) > 53000), True, False)
+
 
 def two_earners_mult_jobs_wksht_required_couple(person, spouse):
-If(And(is_married(person), 
+If(
+    And(is_married(person), 
             filing_jointly(person, spouse), 
             couple_both_work(person, spouse),
-            combined_couple_wages(person, spouse) > 24450)):
-    return True
-Else:
-    return False
+            combined_couple_wages(person, spouse) > 24450), True, False)
+
     
 
 def two_earners_mult_jobs_wksht_line_1(person):
@@ -278,10 +275,7 @@ def two_earners_mult_jobs_wksht_line_1(person):
     # Deductions, Adjustments, and Additional Income Worksheet on page 3, the number from line 10 of that
     # worksheet)
     #tbd, logic to figure out which wksht has been completed
-    If(plans_to_itemize_or_claim_adjustments(person)):
-        return ded_adj_adtl_inc_line_10(person)
-    Else:
-        return personal_allowances_worksheet_line_h(person)
+    If(plans_to_itemize_or_claim_adjustments(person), ded_adj_adtl_inc_line_10(person), personal_allowances_worksheet_line_h(person))
 
 def two_earners_mult_jobs_wksht_line_2(person, spouse):
     # Find the number in Table 1 below that applies to the LOWEST paying job and enter it here. However, if you’re
