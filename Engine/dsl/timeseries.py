@@ -15,18 +15,18 @@ def AddDays(d, n):
 
 
 # Boolean time series that's true starting on a given date, and otherwise false
-def TrueFrom(dt):
+def EffectiveFrom(dt):
     return TS({DawnOfTime: False, dt: True})
 
 
 # Boolean time series that's true up until a given date, and otherwise false
-def TrueUntil(dt):
+def EffectiveUntil(dt):
     return TS({DawnOfTime: True, AddDays(dt, 1): False})
 
 
 # Boolean time series that's true between two dates, and otherwise false
-def TrueBetween(start, end):
-    return And(TrueFrom(start), TrueUntil(end))
+def EffectiveBetween(start, end):
+    return And(EffectiveFrom(start), EffectiveUntil(end))
 
 
 # EXTRACTING VALUES FROM A TIME SERIES

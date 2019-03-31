@@ -50,6 +50,7 @@ def convert_input(typ: str, val: str):
 
 # Applies substantive rules to a fact pattern
 # Returns a determination or a list of needed information
+# TODO: Goals should be tuples containing a function reference, rather than a string
 # Each goal is entered as a string, for example: "module.fcn('jim')"
 def Apply_rules(goals: list, fs=[]):
 

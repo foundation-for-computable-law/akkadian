@@ -314,27 +314,43 @@ def more_internal_or(a, b, cfa, cfb):
 
 # CONDITIONALS
 
-
-# TODO: Allow an arbitrary number of arguments
-# TODO: Implement lazy evaluation so args b and c are only invoked as needed
+# TODO: Handle various types
+# TODO: None/Stub
 # TODO: Implement certainty factors
-def If(a, b, c):
-    if is_none(a) or is_stub(a):
-        return a
-    #if get_val(a) is None:
-    #    return V(None, get_cf(a))
-    #elif is_stub(a):
-    #    return a
-    elif get_val(a):
-        if type(b) is V:
-            return b
+# TODO: Time series
+# TODO: Implement lazy evaluation so args are only invoked as needed
+def If(*args):
+
+    # "ELSE" - Return the default value
+    if len(args) == 1:
+
+        # Box the result up properly
+        val = args[0]
+        if type(val) is V:
+            return val
         else:
-            return V(b)
+            return V(val)
+
+    # "IF" - If the test evaluates to True
+
+    # First catch Stub and None
+    tst = get_val(args[0])
+    if is_stub(tst) or is_none(tst):
+        return args[0]
+
+    # Does test evaluate to True?
+    if tst:
+
+        # "THEN" - Box the result up properly
+        val = args[1]
+        if type(val) is V:
+            return val
+        else:
+            return V(val)
+
+    # Compress the expression and recurse
     else:
-        if type(c) is V:
-            return c
-        else:
-            return V(c)
+        return If(*args[2:])
 
 
 # TYPE TESTING

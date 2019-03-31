@@ -82,6 +82,19 @@ def hourly_wage(p):
 
 # print(Pretty(fed_min_wage()))
 
-result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
+# result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
 
-print(result)
+# print(result)
+
+
+
+
+
+
+print(Pretty(
+    If(False, 1,
+        False, 2,
+        False, 3,
+        4)
+))
+
