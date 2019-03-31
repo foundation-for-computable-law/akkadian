@@ -894,15 +894,15 @@ class TestDSL(unittest.TestCase):
     # Constructing time series
 
     def test_ts_construction_1(self):
-        self.assertEqual(TrueFrom('2020-01-01').value,
+        self.assertEqual(EffectiveFrom('2020-01-01').value,
                          TS({DawnOfTime: False, '2020-01-01': True}).value)
 
     def test_ts_construction_2(self):
-        self.assertEqual(TrueUntil('2020-01-01').value,
+        self.assertEqual(EffectiveUntil('2020-01-01').value,
                          TS({DawnOfTime: True, '2020-01-02': False}).value)
 
     def test_ts_construction_3(self):
-        self.assertEqual(TrueBetween('2020-01-01', '2021-01-01').value,
+        self.assertEqual(EffectiveBetween('2020-01-01', '2021-01-01').value,
                          TS({DawnOfTime: False, '2020-01-01': True, '2021-01-02': False}).value)
 
     def test_ts_construction_4(self):
