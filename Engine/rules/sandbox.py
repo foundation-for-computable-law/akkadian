@@ -87,14 +87,16 @@ def hourly_wage(p):
 # print(result)
 
 
+AsOf(income,last_day_of_month)
 
+Min([2,3])
 
-
+Min([2,3,4])
 
 print(Pretty(
     If(False, 1,
-        False, 2,
-        False, 3,
-        4)
+       False, 2,
+       False, 3,
+       4)
 ))
 

@@ -297,6 +297,7 @@ def two_earners_mult_jobs_wksht_line_2(person, spouse):
     Else:
         return two_earners_mult_jobs_wksht_table_1_all_others_lookup(persons_wages(person))
 
+
 def two_earners_mult_jobs_wksht_line_3(person, spouse):
 
     # If line 1 is more than or equal to line 2, subtract line 2 from line 1. Enter the result here (if zero, enter “-0-”)
@@ -306,11 +307,12 @@ def two_earners_mult_jobs_wksht_line_3(person, spouse):
     Else:
         return two_earners_mult_jobs_wksht_line_4(person)
 
+# Note: If line 1 is less than line 2, enter “-0-” on Form W-4, line 5, page 1. Complete lines 4 through 9 below to
+# figure the additional withholding amount necessary to avoid a year-end tax bill.
+# Enter the number from line 2 of this worksheet
 def two_earners_mult_jobs_wksht_line_4(person, spouse):
-    # Note: If line 1 is less than line 2, enter “-0-” on Form W-4, line 5, page 1. Complete lines 4 through 9 below to
-    # figure the additional withholding amount necessary to avoid a year-end tax bill.
-    # Enter the number from line 2 of this worksheet
     return two_earners_mult_jobs_wksht_line_2(person, spouse)
+
 
 def two_earners_mult_jobs_wksht_line_5(person, spouse):
     # Enter the number from line 1 of this worksheet
@@ -355,123 +357,68 @@ def highest_earning_job_from_couple(person, spouse):
     return Max(highest_earning_job_wages(person), highest_earning_job_wages(spouse))
 
 
-
 def two_earners_mult_jobs_wksht_table_2_married_joint_lookup(wages):
-    If(wages <= 24900):
-        return 420
-    Elif(wages <= 84450):
-        return 500
-    Elif(wages <= 173900):
-        return 910
-    Elif(wages <= 326950):
-        return 1000
-    Elif(wages <= 413700):
-        return 1330
-    Elif(wages <= 617851):
-        return 1450
-    Else:
-        return 1540
+    return If(wages <= 24900, 420,
+              wages <= 84450, 500,
+              wages <= 173900, 910,
+              wages <= 326950, 1000,
+              wages <= 413700, 1330,
+              wages <= 617851, 1450,
+              1540)
+
 
 def two_earners_mult_jobs_wksht_table_2_all_others_lookup(wages):
-    If(wages <= 7200):
-        return 420
-    Elif(wages <= 36975):
-        return 500
-    Elif(wages <= 81700):
-        return 910
-    Elif(wages <= 158225):
-        return 1000
-    Elif(wages <= 201600):
-        return 1330
-    Elif(wages <= 507800):
-        return 1450
-    Else:
-        return 1540
+    return If(wages <= 7200, 420,
+              wages <= 36975, 500,
+              wages <= 81700, 910,
+              wages <= 158225, 1000,
+              wages <= 201600, 1330,
+              wages <= 507800, 1450,
+              1540)
+
 
 def two_earners_mult_jobs_wksht_table_1_married_joint_lookup(wages):
-    #need a clever way to implement
-    If(wages <= 5000):
-        return 0
-    Elif(wages <= 9500):
-        return 1
-    Elif(wages <= 19500):
-        return 2
-    Elif(wages <= 35000):
-        return 3
-    Elif(wages <= 40000):
-        return 4
-    Elif(wages <= 46000):
-        return 5
-    Elif(wages <= 55000):
-        return 6
-    Elif(wages <= 60000):
-        return 7
-    Elif(wages <= 70000):
-        return 8
-    Elif(wages <= 75000):
-        return 9
-    Elif(wages <= 85000):
-        return 10
-    Elif(wages <= 95000):
-        return 11
-    Elif(wages <= 125000):
-        return 12
-    Elif(wages <= 155000):
-        return 13
-    Elif(wages <= 165000):
-        return 14
-    Elif(wages <= 175000):
-        return 15
-    Elif(wages <= 180000):
-        return 16
-    Elif(wages <= 195000):
-        return 17
-    Elif(wages <= 205000):
-        return 18
-    Else:
-        return 19
+    return If(wages <= 5000, 0,
+              wages <= 9500, 1,
+              wages <= 19500, 2,
+              wages <= 35000, 3,
+              wages <= 40000, 4,
+              wages <= 46000, 5,
+              wages <= 55000, 6,
+              wages <= 60000, 7,
+              wages <= 70000, 8,
+              wages <= 75000, 9,
+              wages <= 85000, 10,
+              wages <= 95000, 11,
+              wages <= 125000, 12,
+              wages <= 155000, 13,
+              wages <= 165000, 14,
+              wages <= 175000, 15,
+              wages <= 180000, 16,
+              wages <= 195000, 17,
+              wages <= 205000, 18,
+              19)
 
 
 def two_earners_mult_jobs_wksht_table_1_all_others_lookup(wages):
-    #need a clever way to implement
-    If(wages <= 7000):
-        return 0
-    Elif(wages <= 13000):
-        return 1
-    Elif(wages <= 27500):
-        return 2
-    Elif(wages <= 32000):
-        return 3
-    Elif(wages <= 40000):
-        return 4
-    Elif(wages <= 60000):
-        return 5
-    Elif(wages <= 75000):
-        return 6
-    Elif(wages <= 85000):
-        return 7
-    Elif(wages <= 95000):
-        return 8
-    Elif(wages <= 100000):
-        return 9
-    Elif(wages <= 110000):
-        return 10
-    Elif(wages <= 115000):
-        return 11
-    Elif(wages <= 125000):
-        return 12
-    Elif(wages <= 135000):
-        return 13
-    Elif(wages <= 145000):
-        return 14
-    Elif(wages <= 160000):
-        return 15
-    Elif(wages <= 180000):
-        return 16
-    Else:
-        return 17
-
-
+    return If(wages <= 7000, 0,
+              wages <= 13000, 1,
+              wages <= 27500, 2,
+              wages <= 32000, 3,
+              wages <= 40000, 4,
+              wages <= 60000, 5,
+              wages <= 75000, 6,
+              wages <= 85000, 7,
+              wages <= 95000, 8,
+              wages <= 100000, 9,
+              wages <= 110000, 10,
+              wages <= 115000, 11,
+              wages <= 125000, 12,
+              wages <= 135000, 13,
+              wages <= 145000, 14,
+              wages <= 160000, 15,
+              wages <= 180000, 16,
+              17)
 
 
 ############### base input rules ###############
@@ -533,7 +480,6 @@ def estimate_2019_adj_to_inc_qual_bus_inc_ded_addtl_std_ded(p):
     return In("num", "itemized_deductions_2019", p, None, "Enter an estimate of {0}'s 2019 adjustments to income, "
               + "qualified business income deduction, and any additional standard deduction for age or blindness "
               + "(see Pub. 505 for information about these items) . . ")
-
 
 def estimate_2019_nonwage_inc_not_subj_to_withholding(p):
     return In("num", "itemized_deductions_2019", p, None, "Enter an estimate of {0}'s 2019 nonwage income not subject to withholding (such as dividends or interest)")
