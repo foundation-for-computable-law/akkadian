@@ -4,6 +4,13 @@ from dsl import *
 
 
 ############### source rules ###############
+def form_w4_complete(person, spouse):
+    return And(
+        personal_allowances_wksheet_complete(person, spouse),
+        Or(
+            (not plans_to_itemize_or_claim_adjustments(person)), deductions_adjustments_and_additional_income_wksht_complete(person)),
+        Or(not two_earners_mult_jobs_wksht_required(person, spouse), two_earners_mult_jobs_wksht_complete(person, spouse)))
+
 
 
 #######PERSONAL ALLOWANCES WORKSHEET#######
@@ -160,7 +167,7 @@ def personal_allowances_worksheet_line_h(person):
 
 
 #######Deductions, Adjustments, and Additional Income Worksheet#######
-def deductions_adjustments_and_additional_income_wksht_complete:
+def deductions_adjustments_and_additional_income_wksht_complete(person):
     """
     Note: Use this worksheet only if you plan to itemize deductions, claim certain adjustments to income, or have a large amount of nonwage
     income not subject to withholding.
@@ -239,12 +246,42 @@ def ded_adj_adtl_inc_line_10(person):
 ###############Two Earners/Multiple Jobs Wksht###############
     # Note: Use this worksheet only if the instructions under line H from the Personal Allowances Worksheet direct you here.
 
+def two_earners_mult_jobs_wksht_required(person, spouse):
+    # If you have more than one job at a time 
+    # or are married filing jointly and you and your spouse both work, 
+    # 
+    # and the combined earnings from all jobs exceed $53,000 ($24,450 if married filing jointly), see the
+    # Two-Earners/Multiple Jobs Worksheet on page 4 to avoid having too little tax withheld.  
+    If(Or(two_earners_mult_jobs_wksht_required_single(person), two_earners_mult_jobs_wksht_required_couple(person, spouse))):
+        return True
+    Else:
+        return False
+
+def two_earners_mult_jobs_wksht_required_single(person):
+    If(count_of_jobs(person) > 1, total_income(person) > 53000):
+        return True
+    Else:
+        return False
+
+def two_earners_mult_jobs_wksht_required_couple(person, spouse):
+If(And(is_married(person), 
+            filing_jointly(person, spouse), 
+            couple_both_work(person, spouse),
+            combined_couple_wages(person, spouse) > 24450)):
+    return True
+Else:
+    return False
+    
+
 def two_earners_mult_jobs_wksht_line_1(person):
     # Enter the number from the Personal Allowances Worksheet, line H, page 3 (or, if you used the
     # Deductions, Adjustments, and Additional Income Worksheet on page 3, the number from line 10 of that
     # worksheet)
     #tbd, logic to figure out which wksht has been completed
-    return 0
+    If(plans_to_itemize_or_claim_adjustments(person)):
+        return ded_adj_adtl_inc_line_10(person)
+    Else:
+        return personal_allowances_worksheet_line_h(person)
 
 def two_earners_mult_jobs_wksht_line_2(person, spouse):
     # Find the number in Table 1 below that applies to the LOWEST paying job and enter it here. However, if you’re
@@ -503,3 +540,10 @@ def estimate_2019_nonwage_inc_not_subj_to_withholding(p):
 
 def highest_earning_job_wages(p):
     return In("num", "highest_earning_job_total_wages", p, None, "Enter the wages from {0}'s highest earning job.")
+
+def plans_to_itemize_or_claim_adjustments(p):
+    return In("bool", "plans_to_itemize_or_claim_adjustments", p, None, "Does {0} plan  to itemize or claim adjustments to income and want to reduce " 
+        + "their withholding, or if do they have a large amount of nonwage income not subject to withholding and want to increase their withholding.")
+
+def couple_both_work(p, s):
+    return In("bool", "couple_both_work", p, s, "Do {0} and {1} both work?")
