@@ -84,19 +84,11 @@ def hourly_wage(p):
 
 # result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
 
-# print(result)
 
-
-AsOf(income,last_day_of_month)
-
-Min([2,3])
-
-Min([2,3,4])
-
-print(Pretty(
-    If(False, 1,
-       False, 2,
-       False, 3,
-       4)
-))
-
+print(
+    If(
+        V(False, 0.08), V(2, .7),
+        V(False, 0.9), V(3, 0.6),
+        V(False, 0.5), V(4, 0.3),
+        V(1, 0.19)).cf
+)

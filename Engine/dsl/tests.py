@@ -557,6 +557,62 @@ class TestDSL(unittest.TestCase):
     def test_if_7(self):
         self.assertEqual(If(True, Stub(), 2).value, StubVal)
 
+    def test_if_cf_1(self):
+        self.assertEqual(
+            If(V(False, 0.08), V(2, .7),
+               V(False, 0.9), V(3, 0.6),
+               V(False, 0.5), V(4, 0.3),
+               V(1, 0.19)).cf,
+            0.08)
+
+    def test_if_cf_2(self):
+        self.assertEqual(
+            If(V(True, 0.8), V(2, .7),
+               V(False, 0.9), V(3, 0.6),
+               V(False, 0.5), V(4, 0.3),
+               V(1, 0.19)).cf,
+            0.7)
+
+    def test_if_cf_3(self):
+        self.assertEqual(
+            If(V(True, 0.3), V(2, .7),
+               V(False, 0.9), V(3, 0.6),
+               V(False, 0.5), V(4, 0.3),
+               V(1, 0.19)).cf,
+            0.3)
+
+    def test_if_cf_4(self):
+        self.assertEqual(
+            If(V(False, 0.8), V(2, .7),
+               V(True, 0.9), V(3, 0.6),
+               V(False, 0.5), V(4, 0.3),
+               V(1, 0.19)).cf,
+            0.6)
+
+    def test_if_cf_5(self):
+        self.assertEqual(
+            If(V(False, 0.8), V(2, .7),
+               V(True, 0.1), V(3, 0.6),
+               V(False, 0.5), V(4, 0.3),
+               V(1, 0.19)).cf,
+            0.1)
+
+    def test_if_cf_6(self):
+        self.assertEqual(
+            If(V(False, 0.8), V(2, .7),
+               V(False, 0.9), V(3, 0.6),
+               V(False, 0.5), V(4, 0.3),
+               V(1, 0.19)).cf,
+            0.19)
+
+    def test_if_cf_7(self):
+        self.assertEqual(
+            If(V(False, 0.8), V(2, .7),
+               V(False, 0.9), V(3, 0.6),
+               V(False, 0.5), V(4, 0.3),
+               V(1, 0.9)).cf,
+            0.5)
+
     # CFs - OR
 
     def test_cf_or_1(self):
@@ -1053,6 +1109,42 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Pretty(TS({DawnOfTime: 4, '2020-01-01': 8}) > 5),
                          Pretty(TS({DawnOfTime: False,
                                     '2020-01-01': True})))
+
+    # ADDDAYS
+
+    def test_adddays_1(self):
+        self.assertEqual(
+            Pretty(AddDays(TS({DawnOfTime: '2001-02-02', '2010-08-03': '2020-08-10'}),
+                            TS({DawnOfTime: 23, '2010-02-03': 234}))),
+            Pretty(TS({'1900-01-01': '2001-02-25',
+                       '2010-02-03': '2001-09-24',
+                       '2010-08-03': '2021-04-01'
+                })))
+
+    def test_adddays_2(self):
+        self.assertEqual(
+            Pretty(AddDays('2000-01-01', TS({DawnOfTime: 23, '2010-02-03': 234}))),
+            Pretty(TS({'1900-01-01': '2000-01-24', '2010-02-03': '2000-08-22'})))
+
+    def test_adddays_3(self):
+        self.assertEqual(
+            Pretty(AddDays('2000-01-01', 5232)),
+            Pretty(V('2014-04-29')))
+
+    def test_adddays_4(self):
+        self.assertEqual(
+            Pretty(AddDays('2000-01-01', Stub())),
+            Pretty(Stub()))
+
+    def test_adddays_5(self):
+        self.assertEqual(
+            Pretty(AddDays('2000-01-01', None)),
+            Pretty(None))
+
+    def test_adddays_6(self):
+        self.assertEqual(
+            Pretty(AddDays('2000-01-01', TS({DawnOfTime: 23, '2010-02-03': None}))),
+            Pretty(TS({'1900-01-01': '2000-01-24', '2010-02-03': None})))
 
 
 # Used to test time series logic

@@ -3,6 +3,9 @@ import operator
 import traces
 
 
+# TODO: Make some methods below private
+
+
 # TEMPORAL SUBSTRATE
 
 
@@ -30,6 +33,7 @@ def apply_unary_ts_fcn(f, ts):
 # Instantiate a new time series, given a list of date-value pairs
 # Reduces eternal time series to simple V objects
 def TS(pairs):
+    # TODO: Convert any V objects in the list of dates to date strings
     ts = ts_trim(traces.TimeSeries(pairs))
     if is_eternal_ts(ts):
         return V(pairs[DawnOfTime])
@@ -172,14 +176,25 @@ def process_binary(f, a_in, b_in):
         return V(None, cfa)
     elif b is None:
         return V(None, cfb)
+    # TODO: CFs for time series
     elif is_timeseries(a) and is_timeseries(b):
-        return V(apply_binary_ts_fcn(lambda x, y: process_binary(f, x, y), a, b), 1) # TODO: CF?
+        return V(apply_binary_ts_fcn(lambda x, y: process_binary(f, x, y), a, b), 1)
     elif is_timeseries(a):
-        return V(apply_binary_ts_fcn(f, a, traces.TimeSeries({DawnOfTime: b})), 1) # TODO: CF?
+        return V(apply_binary_ts_fcn(lambda x, y: process_binary(f, x, y), a, traces.TimeSeries({DawnOfTime: b})), 1)
     elif is_timeseries(b):
-        return V(apply_binary_ts_fcn(f, traces.TimeSeries({DawnOfTime: a}), b), 1) # TODO: CF?
+        return V(apply_binary_ts_fcn(lambda x, y: process_binary(f, x, y), traces.TimeSeries({DawnOfTime: a}), b), 1)
     else:
         return V(f(a, b), min(cfa, cfb))
+
+
+# Internal processing of a unary function
+def process_unary(f, a):
+    if is_none(a) or is_stub(a):
+        return a
+    elif is_ts_V(a):
+        return V(apply_unary_ts_fcn(lambda x: process_unary(f, x), a.value), get_cf(a))
+    else:
+        return V(f(get_val(a)), get_cf(a))
 
 
 # STUBS
@@ -212,42 +227,6 @@ def Not(a):
         return V(apply_unary_ts_fcn(Not, a.value), get_cf(a))
     else:
         return V(not get_val(a), get_cf(a))
-
-
-# DISPLAY
-
-
-# Display a V object as a comprehensible string
-def Pretty(a):
-    if is_ts_V(a):
-        return apply_unary_ts_fcn(Pretty, a.value)
-    else:
-        return str("Stub" if is_stub(a) else get_val(a)) + " (" + str(round(get_cf(a) * 100)) + "% certain)"
-
-
-# *******************************************************
-# INTERNAL METHODS
-# TODO: Make the methods below private, if possible
-# *******************************************************
-
-
-# VALUES AND CFs
-
-
-# Gets the certainty factor of a V object or scalar
-def get_cf(a):
-    if type(a) is V:
-        return a.cf
-    else:
-        return 1
-
-
-# Gets the value of a V object or scalar
-def get_val(a):
-    if type(a) is V:
-        return a.value
-    else:
-        return a
 
 
 def internal_and(a, b):
@@ -314,43 +293,71 @@ def more_internal_or(a, b, cfa, cfb):
 
 # CONDITIONALS
 
-# TODO: Handle various types
-# TODO: None/Stub
-# TODO: Implement certainty factors
+# IF - An if-then-else statement that can take time series arguments
+# Can take an arbitrary number of arguments
+# Odd-numbered arguments are Boolean tests; even-numbered arguments are possible return values
+# The final argument is the default value (required)
+# The resulting CF is the minimum CF of all Boolean tests evaluated in order to get a result,
+# and also of the CF of the return value
 # TODO: Time series
 # TODO: Implement lazy evaluation so args are only invoked as needed
 def If(*args):
+    return internal_if(1, *args)
+
+
+def internal_if(cf, *args):
 
     # "ELSE" - Return the default value
     if len(args) == 1:
-
-        # Box the result up properly
-        val = args[0]
-        if type(val) is V:
-            return val
-        else:
-            return V(val)
+        return _box(args[0], min(cf, get_cf(args[0])))
 
     # "IF" - If the test evaluates to True
 
     # First catch Stub and None
     tst = get_val(args[0])
-    if is_stub(tst) or is_none(tst):
+    if is_stub(tst):
         return args[0]
+    elif is_none(tst):
+        if is_stub(args[1]):
+            return args[1]
+        else:
+            return args[0]
 
     # Does test evaluate to True?
     if tst:
-
-        # "THEN" - Box the result up properly
-        val = args[1]
-        if type(val) is V:
-            return val
-        else:
-            return V(val)
+        # "THEN"
+        return _box(args[1], min(cf, get_cf(args[0]), get_cf(args[1])))
 
     # Compress the expression and recurse
     else:
-        return If(*args[2:])
+        return internal_if(min(cf, get_cf(args[0])), *args[2:])
+
+
+# TYPE MANIPULATION
+
+
+# Gets the certainty factor of a V object or scalar
+def get_cf(a):
+    if type(a) is V:
+        return a.cf
+    else:
+        return 1
+
+
+# Gets the value of a V object or scalar
+def get_val(a):
+    if type(a) is V:
+        return a.value
+    else:
+        return a
+
+
+# Put a value into a V object, if it isn't already a V object
+def _box(val, cf):
+    if type(val) is V:
+        return V(val.value, cf)
+    else:
+        return V(val, cf)
 
 
 # TYPE TESTING
@@ -383,3 +390,14 @@ def is_stub_and_not_ts(a):
 # Determines whether an object is a scalar
 def is_scalar(a):
     return type(a) is not V and type(a) is not None and not is_timeseries(a)
+
+
+# DISPLAY
+
+
+# Display a V object as a comprehensible string
+def Pretty(a):
+    if is_ts_V(a):
+        return apply_unary_ts_fcn(Pretty, a.value)
+    else:
+        return str("Stub" if is_stub(a) else get_val(a)) + " (" + str(round(get_cf(a) * 100)) + "% certain)"
