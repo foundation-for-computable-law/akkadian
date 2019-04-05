@@ -37,26 +37,20 @@ def filing_jointly(p):
 
 # convert boolean to 1/0 for adding?
 # C, head of household
+    #     Line C. Head of household please note:
+    # Generally, you may claim head of household
+    # filing status on your tax return only if you’re
+    # unmarried and pay more than 50% of the
+    # costs of keeping up a home for yourself and
+    # a qualifying individual. See Pub. 501 for
+    # more information about filing status
 def file_head_of_household(person):
-    # playing with docstring
-    """
-        Line C. Head of household please note:
-    Generally, you may claim head of household
-    filing status on your tax return only if you’re
-    unmarried and pay more than 50% of the
-    costs of keeping up a home for yourself and
-    a qualifying individual. See Pub. 501 for
-    more information about filing status
-    """
     return If(head_of_household(person), 1, 0)
 
-
+    # • You’re single, or married filing separately, and have only one job; or
+    # •  You’re married filing jointly, have only one job, and your spouse doesn’t work; or
+    # • Your wages from a second job or your spouse’s wages (or the total of both) are $1,500 or less
 def only_job_or_low_wage_second(person, spouse):
-    """
-    • You’re single, or married filing separately, and have only one job; or
-    •  You’re married filing jointly, have only one job, and your spouse doesn’t work; or
-    • Your wages from a second job or your spouse’s wages (or the total of both) are $1,500 or less
-    """
     # dev question, could we infer "only one job" as one active wages/employment record? Probably a question for policy team.
     # formatting? #readability?
     If(
@@ -83,18 +77,14 @@ def married_filing_separately(person, spouse):
 def filing_separately(p):
     return Not(filing_jointly(p))
 
-
+# Child tax credit. See Pub. 972, Child Tax Credit, for more information.
+# • If your total income will be less than $71,201 ($103,351 if married filing jointly), enter 4 for each eligible child.
+# • If your total income will be from $71,201 to $179,050 ($103,351 to $345,850 if married filing jointly), enter 2 for each
+# eligible child.
+# • If your total income will be from $179,051 to $200,000 ($345,851 to $400,000 if married filing jointly), enter 1 for
+# each eligible child.
+# • If your total income will be higher than $200,000 ($400,000 if married filing jointly), enter -0- . . . . . . .
 def child_tax_credit(person, spouse):
-    """
-    Child tax credit. See Pub. 972, Child Tax Credit, for more information.
-    • If your total income will be less than $71,201 ($103,351 if married filing jointly), enter 4 for each eligible child.
-    • If your total income will be from $71,201 to $179,050 ($103,351 to $345,850 if married filing jointly), enter 2 for each
-    eligible child.
-    • If your total income will be from $179,051 to $200,000 ($345,851 to $400,000 if married filing jointly), enter 1 for
-    each eligible child.
-    • If your total income will be higher than $200,000 ($400,000 if married filing jointly), enter -0- . . . . . . .
-    """
-
     If(spouse is not None):
         If(file_married_jointly(person, spouse)):
             If(total_income(person) + total_income(spouse) < 103, 351):
@@ -121,16 +111,14 @@ def child_tax_credit(person, spouse):
         else:
             return 0
 
-
+    
+# Credit for other dependents. See Pub. 972, Child Tax Credit, for more information.
+# • If your total income will be less than $71,201 ($103,351 if married filing jointly), enter “1” for each eligible dependent.
+# • If your total income will be from $71,201 to $179,050 ($103,351 to $345,850 if married filing jointly), enter “1” for every
+# two dependents (for example, “-0-” for one dependent, “1” if you have two or three dependents, and “2” if you have
+# four dependents).
+# • If your total income will be higher than $179,050 ($345,850 if married filing jointly), enter “-0-” . . . . . .
 def credit_for_other_dependents():
-    """
-    Credit for other dependents. See Pub. 972, Child Tax Credit, for more information.
-    • If your total income will be less than $71,201 ($103,351 if married filing jointly), enter “1” for each eligible dependent.
-    • If your total income will be from $71,201 to $179,050 ($103,351 to $345,850 if married filing jointly), enter “1” for every
-    two dependents (for example, “-0-” for one dependent, “1” if you have two or three dependents, and “2” if you have
-    four dependents).
-    • If your total income will be higher than $179,050 ($345,850 if married filing jointly), enter “-0-” . . . . . .
-    """
     If(spouse is not None):
         If(file_married_jointly(person, spouse)):
             If(total_income(person) + total_income(spouse) < 103, 351):
@@ -150,12 +138,9 @@ def credit_for_other_dependents():
         elif(total_income(person) > 179, 050):
             return 0
 
-
+# Other credits. If you have other credits, see Worksheet 1-6 of Pub. 505 and enter the amount from that worksheet
+# here. If you use Worksheet 1-6, enter “-0-” on lines E and F . . . . 
 def other_credits(person):
-    """
-    Other credits. If you have other credits, see Worksheet 1-6 of Pub. 505 and enter the amount from that worksheet
-    here. If you use Worksheet 1-6, enter “-0-” on lines E and F . . . . 
-    """
     return If(has_other_credits(person), other_credits_pub505(person), 0)
 
 
@@ -167,25 +152,21 @@ def personal_allowances_worksheet_line_h(person):
 
 
 #######Deductions, Adjustments, and Additional Income Worksheet#######
+# Note: Use this worksheet only if you plan to itemize deductions, claim certain adjustments to income, or have a large amount of nonwage
+# income not subject to withholding.
 def deductions_adjustments_and_additional_income_wksht_complete(person):
-    """
-    Note: Use this worksheet only if you plan to itemize deductions, claim certain adjustments to income, or have a large amount of nonwage
-    income not subject to withholding.
-    """
     return ded_adj_adtl_inc_line_10 >= 0
 
-
+# Enter an estimate of your 2019 itemized deductions. These include qualifying home mortgage interest,
+# charitable contributions, state and local taxes (up to $10,000), and medical expenses in excess of 10% of
+# your income. See Pub. 505 for details . . . . . . . . . . . . . . . . . . . . . .
 def ded_adj_adtl_inc_line_1(person):
-    # Enter an estimate of your 2019 itemized deductions. These include qualifying home mortgage interest,
-    # charitable contributions, state and local taxes (up to $10,000), and medical expenses in excess of 10% of
-    # your income. See Pub. 505 for details . . . . . . . . . . . . . . . . . . . . . .
     return itemized_deductions_2019(person)
 
-
+# 2 Enter: { $24,400 if you’re married filing jointly or qualifying widow(er)
+# $18,350 if you’re head of household
+# $12,200 if you’re single or married filing separately } . .
 def ded_adj_adtl_inc_line_2(person):
-    # 2 Enter: { $24,400 if you’re married filing jointly or qualifying widow(er)
-    # $18,350 if you’re head of household
-    # $12,200 if you’re single or married filing separately } . .
     If(
             Or(filing_jointly(person), qualifying_widower(person))):
         return 24400
@@ -195,63 +176,56 @@ def ded_adj_adtl_inc_line_2(person):
         Or(is_single(person), filing_separately(person)))
     return 12200
 
-
+# Subtract line 2 from line 1. If zero or less, enter “-0-”
 def ded_adj_adtl_inc_line_3(person):
-    # Subtract line 2 from line 1. If zero or less, enter “-0-”
+
     If(ded_adj_adtl_inc_line_1(person) - ded_adj_adtl_inc_line_2(person) >= 0):
         return ded_adj_adtl_inc_line_1(person) - ded_adj_adtl_inc_line_2(person)
     Else:
         return False
 
-
+# Enter an estimate of your 2019 adjustments to income, qualified business income deduction, and any
+# additional standard deduction for age or blindness (see Pub. 505 for information about these items) . .
 def ded_adj_adtl_inc_line_4(person):
-    # Enter an estimate of your 2019 adjustments to income, qualified business income deduction, and any
-    # additional standard deduction for age or blindness (see Pub. 505 for information about these items) . .
     return estimate_2019_adj_to_inc_qual_bus_inc_ded_addtl_std_ded(person)
 
-
+# Add lines 3 and 4 and enter the total
 def ded_adj_adtl_inc_line_5(person):
-    # Add lines 3 and 4 and enter the total
     return ded_adj_adtl_inc_line_3(person) + ded_adj_adtl_inc_line_4(person)
 
-
+# Enter an estimate of your 2019 nonwage income not subject to withholding (such as dividends or interest) .
 def ded_adj_adtl_inc_line_6(person):
-    # Enter an estimate of your 2019 nonwage income not subject to withholding (such as dividends or interest) .
     return estimate_2019_nonwage_inc_not_subj_to_withholding(person)
 
-
+# Subtract line 6 from line 5. If zero, enter “-0-”. If less than zero, enter the amount in parentheses
 def ded_adj_adtl_inc_line_7(person):
-    # Subtract line 6 from line 5. If zero, enter “-0-”. If less than zero, enter the amount in parentheses
     return ded_adj_adtl_inc_line_5(person) - ded_adj_adtl_inc_line_6(person)
 
-
+# Divide the amount on line 7 by $4,200 and enter the result here. If a negative amount, enter in parentheses.
+# Drop any fraction
 def ded_adj_adtl_inc_line_8(person):
-    # Divide the amount on line 7 by $4,200 and enter the result here. If a negative amount, enter in parentheses.
-    # Drop any fraction
     return math.floor(ded_adj_adtl_inc_line_7(person) / 4200)
 
-
+# Enter the number from the Personal Allowances Worksheet, line H, above
 def ded_adj_adtl_inc_line_9(person):
-    # Enter the number from the Personal Allowances Worksheet, line H, above
     return personal_allowances_worksheet_line_h(person)
 
-
+# Add lines 8 and 9 and enter the total here. If zero or less, enter “- 0 -”. If you plan to use the Two-Earners/
+# Multiple Jobs Worksheet, also enter this total on line 1 of that worksheet on page 4. Otherwise, stop here
+# and enter this total on Form W-4, line 5, page 1
 def ded_adj_adtl_inc_line_10(person):
-    # Add lines 8 and 9 and enter the total here. If zero or less, enter “- 0 -”. If you plan to use the Two-Earners/
-    # Multiple Jobs Worksheet, also enter this total on line 1 of that worksheet on page 4. Otherwise, stop here
-    # and enter this total on Form W-4, line 5, page 1
     return max(ded_adj_adtl_inc_line_8(person) + ded_adj_adtl_inc_line_9(person), 0)
 
 
 ###############Two Earners/Multiple Jobs Wksht###############
-    # Note: Use this worksheet only if the instructions under line H from the Personal Allowances Worksheet direct you here.
+# Note: Use this worksheet only if the instructions under line H from the Personal Allowances Worksheet direct you here.
 
+# If you have more than one job at a time 
+# or are married filing jointly and you and your spouse both work, 
+# 
+# and the combined earnings from all jobs exceed $53,000 ($24,450 if married filing jointly), see the
+# Two-Earners/Multiple Jobs Worksheet on page 4 to avoid having too little tax withheld.  
 def two_earners_mult_jobs_wksht_required(person, spouse):
-    # If you have more than one job at a time 
-    # or are married filing jointly and you and your spouse both work, 
-    # 
-    # and the combined earnings from all jobs exceed $53,000 ($24,450 if married filing jointly), see the
-    # Two-Earners/Multiple Jobs Worksheet on page 4 to avoid having too little tax withheld.  
     If(
         Or(two_earners_mult_jobs_wksht_required_single(person), two_earners_mult_jobs_wksht_required_couple(person, spouse)),
         True, False):
@@ -269,20 +243,18 @@ If(
             combined_couple_wages(person, spouse) > 24450), True, False)
 
     
-
+# Enter the number from the Personal Allowances Worksheet, line H, page 3 (or, if you used the
+# Deductions, Adjustments, and Additional Income Worksheet on page 3, the number from line 10 of that
+# worksheet)
+#tbd, logic to figure out which wksht has been completed
 def two_earners_mult_jobs_wksht_line_1(person):
-    # Enter the number from the Personal Allowances Worksheet, line H, page 3 (or, if you used the
-    # Deductions, Adjustments, and Additional Income Worksheet on page 3, the number from line 10 of that
-    # worksheet)
-    #tbd, logic to figure out which wksht has been completed
-    If(plans_to_itemize_or_claim_adjustments(person), ded_adj_adtl_inc_line_10(person), personal_allowances_worksheet_line_h(person))
+    return If(plans_to_itemize_or_claim_adjustments(person), ded_adj_adtl_inc_line_10(person), personal_allowances_worksheet_line_h(person))
 
+# Find the number in Table 1 below that applies to the LOWEST paying job and enter it here. However, if you’re
+# married filing jointly and wages from the highest paying job are $75,000 or less and the combined wages for
+# you and your spouse are $107,000 or less, don’t enter more than “3” 
 def two_earners_mult_jobs_wksht_line_2(person, spouse):
-    # Find the number in Table 1 below that applies to the LOWEST paying job and enter it here. However, if you’re
-    # married filing jointly and wages from the highest paying job are $75,000 or less and the combined wages for
-    # you and your spouse are $107,000 or less, don’t enter more than “3” 
     If(
-        # if then else?
         And(is_married(person), filing_jointly(person), highest_earning_job_from_couple(person, spouse) <= 75000, combined_couple_wages(person, spouse))):
         #assumes only one job, needs to be expanded
         return min(3, line_2_table_1_married_joint_lookup(min(persons_wages(person), persons_wages(spouse))))
@@ -292,14 +264,14 @@ def two_earners_mult_jobs_wksht_line_2(person, spouse):
         return two_earners_mult_jobs_wksht_table_1_all_others_lookup(persons_wages(person))
 
 
+# If line 1 is more than or equal to line 2, subtract line 2 from line 1. Enter the result here (if zero, enter “-0-”)
+# and on Form W-4, line 5, page 1. Do not use the rest of this worksheet
 def two_earners_mult_jobs_wksht_line_3(person, spouse):
-
-    # If line 1 is more than or equal to line 2, subtract line 2 from line 1. Enter the result here (if zero, enter “-0-”)
-    # and on Form W-4, line 5, page 1. Do not use the rest of this worksheet
     If(two_earners_mult_jobs_wksht_line_1(person) >= two_earners_mult_jobs_wksht_line_2(person, spouse)):
         return two_earners_mult_jobs_wksht_line_2(person, spouse) - two_earners_mult_jobs_wksht_line_1(person)
     Else:
         return two_earners_mult_jobs_wksht_line_4(person)
+
 
 # Note: If line 1 is less than line 2, enter “-0-” on Form W-4, line 5, page 1. Complete lines 4 through 9 below to
 # figure the additional withholding amount necessary to avoid a year-end tax bill.
@@ -307,17 +279,16 @@ def two_earners_mult_jobs_wksht_line_3(person, spouse):
 def two_earners_mult_jobs_wksht_line_4(person, spouse):
     return two_earners_mult_jobs_wksht_line_2(person, spouse)
 
-
+# Enter the number from line 1 of this worksheet
 def two_earners_mult_jobs_wksht_line_5(person, spouse):
-    # Enter the number from line 1 of this worksheet
     return two_earners_mult_jobs_wksht_line_1(person)
 
+# 6 Subtract line 5 from line 4 
 def two_earners_mult_jobs_wksht_line_6(person, spouse):
-    # 6 Subtract line 5 from line 4 
     return two_earners_mult_jobs_wksht_line_4(person, spouse) - two_earners_mult_jobs_wksht_line_5(person, spouse)
 
+# Find the amount in Table 2 below that applies to the HIGHEST paying job and enter it here
 def two_earners_mult_jobs_wksht_line_7(person, spouse):
-    # Find the amount in Table 2 below that applies to the HIGHEST paying job and enter it here
     If(And(is_married(person), filing_jointly(person)):
         # assumes one job, needs to be expanded
         return two_earners_mult_jobs_wksht_table_2_married_joint_lookup(max(persons_wages(person), persons_wages(spouse)))
@@ -433,8 +404,6 @@ def head_of_household(p):
     return(In("bool", "head_of_household", p, None, "Is {0} the head of their household?"))
 
 # converting boolean to integer for summing, is there a better pattern to employ?
-
-
 def is_claiming_self(p):
     return(In("bool", "claim_self", p, None, "Does {0} intend to claim themself?"))
 
