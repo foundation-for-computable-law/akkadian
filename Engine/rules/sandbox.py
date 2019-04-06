@@ -80,15 +80,25 @@ def hourly_wage(p):
 # Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'])
 # Investigate(['sandbox.another_rule("Neela")'])
 
-# print(Pretty(fed_min_wage()))
 
 # result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
 
 
+
+# def TimeSeriesMergeArgs(*args):
+#     return traces.TimeSeries.merge([a.value for a in args])
+
+
+ts1 = TS({DawnOfTime: 0, Now: 6})
+ts2 = TS({DawnOfTime: 5, '2001-02-03': 13, '2019-04-19': 38, '2020-04-19': 38})
+ts3 = TS({DawnOfTime: 5, '2000-02-03': 3, '2019-07-09': 50, '2021-04-19': 138})
+# ts3 = TS({DawnOfTime: 5, '2000-02-03': 3, '2019-07-09': 50, '2021-04-19': 138})
+
 print(
-    If(
-        V(False, 0.08), V(2, .7),
-        V(False, 0.9), V(3, 0.6),
-        V(False, 0.5), V(4, 0.3),
-        V(1, 0.19)).cf
+    # TimeSeriesMerge(ts1, ts2, ts3)
+    # TimeSeriesMap(max, TimeSeriesMerge([ts1, ts2, ts3]))
+    # TimeSeriesMergeMap(len, ts1, ts2, ts3)
+    # TimeSeriesMap(lambda x: x*8, ts3)
+    time_series_zip(ts1,ts2, Stub())
+    # to_ts(Stub())
 )

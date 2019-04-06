@@ -30,6 +30,42 @@ def apply_unary_ts_fcn(f, ts):
     return ts_trim(ts.operation(ts, lambda x, y: f(x)))
 
 
+# Apply a function that has an arbitrary number of inputs to
+def apply_multi_ts_fcn(f, *args):
+    return 1
+
+
+# Merge multiple time series together so that each value is a list
+# composed of the values of the input time series at that interval
+def TimeSeriesMerge(*args):
+    return traces.TimeSeries.merge([a.value for a in args])
+
+
+def time_series_zip(*args):
+    return traces.TimeSeries.merge([to_traces_ts(a) for a in args])
+
+# Converts a value to a traces.TimeSeries object, so it can be processed
+# by that library
+def to_traces_ts(a):
+    if is_ts_V(a):
+        return a.value
+    else:
+        return traces.TimeSeries({DawnOfTime: a})
+
+# Map a function over the values of a time series
+# def TimeSeriesMap(f, a):
+#     if is_none(a) or is_stub(a):
+#         return a
+#     elif is_ts_V(a):
+#         return V(apply_unary_ts_fcn(f, a.value), get_cf(a))
+#     else:
+#         return V(f(get_val(a)), get_cf(a))
+#
+#
+# def TimeSeriesMergeMap(f, *args):
+#     return TimeSeriesMap(f, TimeSeriesMerge(*args))
+
+
 # Instantiate a new time series, given a list of date-value pairs
 # Reduces eternal time series to simple V objects
 def TS(pairs):
