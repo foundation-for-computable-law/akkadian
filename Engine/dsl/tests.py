@@ -557,61 +557,61 @@ class TestDSL(unittest.TestCase):
     def test_if_7(self):
         self.assertEqual(If(True, Stub(), 2).value, StubVal)
 
-    def test_if_cf_1(self):
-        self.assertEqual(
-            If(V(False, 0.08), V(2, .7),
-               V(False, 0.9), V(3, 0.6),
-               V(False, 0.5), V(4, 0.3),
-               V(1, 0.19)).cf,
-            0.08)
-
-    def test_if_cf_2(self):
-        self.assertEqual(
-            If(V(True, 0.8), V(2, .7),
-               V(False, 0.9), V(3, 0.6),
-               V(False, 0.5), V(4, 0.3),
-               V(1, 0.19)).cf,
-            0.7)
-
-    def test_if_cf_3(self):
-        self.assertEqual(
-            If(V(True, 0.3), V(2, .7),
-               V(False, 0.9), V(3, 0.6),
-               V(False, 0.5), V(4, 0.3),
-               V(1, 0.19)).cf,
-            0.3)
-
-    def test_if_cf_4(self):
-        self.assertEqual(
-            If(V(False, 0.8), V(2, .7),
-               V(True, 0.9), V(3, 0.6),
-               V(False, 0.5), V(4, 0.3),
-               V(1, 0.19)).cf,
-            0.6)
-
-    def test_if_cf_5(self):
-        self.assertEqual(
-            If(V(False, 0.8), V(2, .7),
-               V(True, 0.1), V(3, 0.6),
-               V(False, 0.5), V(4, 0.3),
-               V(1, 0.19)).cf,
-            0.1)
-
-    def test_if_cf_6(self):
-        self.assertEqual(
-            If(V(False, 0.8), V(2, .7),
-               V(False, 0.9), V(3, 0.6),
-               V(False, 0.5), V(4, 0.3),
-               V(1, 0.19)).cf,
-            0.19)
-
-    def test_if_cf_7(self):
-        self.assertEqual(
-            If(V(False, 0.8), V(2, .7),
-               V(False, 0.9), V(3, 0.6),
-               V(False, 0.5), V(4, 0.3),
-               V(1, 0.9)).cf,
-            0.5)
+    # def test_if_cf_1(self):
+    #     self.assertEqual(
+    #         If(V(False, 0.08), V(2, .7),
+    #            V(False, 0.9), V(3, 0.6),
+    #            V(False, 0.5), V(4, 0.3),
+    #            V(1, 0.19)).cf,
+    #         0.08)
+    #
+    # def test_if_cf_2(self):
+    #     self.assertEqual(
+    #         If(V(True, 0.8), V(2, .7),
+    #            V(False, 0.9), V(3, 0.6),
+    #            V(False, 0.5), V(4, 0.3),
+    #            V(1, 0.19)).cf,
+    #         0.7)
+    #
+    # def test_if_cf_3(self):
+    #     self.assertEqual(
+    #         If(V(True, 0.3), V(2, .7),
+    #            V(False, 0.9), V(3, 0.6),
+    #            V(False, 0.5), V(4, 0.3),
+    #            V(1, 0.19)).cf,
+    #         0.3)
+    #
+    # def test_if_cf_4(self):
+    #     self.assertEqual(
+    #         If(V(False, 0.8), V(2, .7),
+    #            V(True, 0.9), V(3, 0.6),
+    #            V(False, 0.5), V(4, 0.3),
+    #            V(1, 0.19)).cf,
+    #         0.6)
+    #
+    # def test_if_cf_5(self):
+    #     self.assertEqual(
+    #         If(V(False, 0.8), V(2, .7),
+    #            V(True, 0.1), V(3, 0.6),
+    #            V(False, 0.5), V(4, 0.3),
+    #            V(1, 0.19)).cf,
+    #         0.1)
+    #
+    # def test_if_cf_6(self):
+    #     self.assertEqual(
+    #         If(V(False, 0.8), V(2, .7),
+    #            V(False, 0.9), V(3, 0.6),
+    #            V(False, 0.5), V(4, 0.3),
+    #            V(1, 0.19)).cf,
+    #         0.19)
+    #
+    # def test_if_cf_7(self):
+    #     self.assertEqual(
+    #         If(V(False, 0.8), V(2, .7),
+    #            V(False, 0.9), V(3, 0.6),
+    #            V(False, 0.5), V(4, 0.3),
+    #            V(1, 0.9)).cf,
+    #         0.5)
 
     # CFs - OR
 
@@ -1145,6 +1145,39 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(
             Pretty(AddDays('2000-01-01', TS({DawnOfTime: 23, '2010-02-03': None}))),
             Pretty(TS({'1900-01-01': '2000-01-24', '2010-02-03': None})))
+
+# is_stub
+
+    def test_is_stub_1(self):
+        self.assertEqual(is_stub(Stub()), True)
+
+    def test_is_stub_2(self):
+        self.assertEqual(is_stub(V(45)), False)
+
+    def test_is_stub_3(self):
+        self.assertEqual(is_stub(V([1, 2, 3])), False)
+
+    def test_is_stub_4(self):
+        self.assertEqual(is_stub([False, False, True]), False)
+
+    def test_is_stub_5(self):
+        self.assertEqual(is_stub(True), False)
+
+    def test_is_stub_6(self):
+        self.assertEqual(is_stub(TS({DawnOfTime: 4}).value), False)
+
+    def test_is_stub_7(self):
+        self.assertEqual(is_stub(TS({DawnOfTime: 4})), False)
+
+    # Time series thread
+
+    # TODO: This isn't actually working...the test comparison is broken
+    def time_series_thread_1(self):
+        self.assertEqual(Pretty(time_series_thread(tsnum1, tsnum2)),
+                         Pretty(TS({'1900-01-01': [4, 24],
+                                    '2020-01-01': [8, 24],
+                                    '2021-01-01': [None, 24],
+                                    '2023-01-01': [None, 3]})))
 
 
 # Used to test time series logic

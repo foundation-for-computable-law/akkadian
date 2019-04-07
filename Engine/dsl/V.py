@@ -41,8 +41,8 @@ def TimeSeriesMerge(*args):
     return traces.TimeSeries.merge([a.value for a in args])
 
 
-def time_series_zip(*args):
-    return traces.TimeSeries.merge([to_traces_ts(a) for a in args])
+def time_series_thread(*args):
+    return V(traces.TimeSeries.merge([to_traces_ts(a) for a in args]))
 
 # Converts a value to a traces.TimeSeries object, so it can be processed
 # by that library
@@ -53,13 +53,13 @@ def to_traces_ts(a):
         return traces.TimeSeries({DawnOfTime: a})
 
 # Map a function over the values of a time series
-# def TimeSeriesMap(f, a):
-#     if is_none(a) or is_stub(a):
-#         return a
-#     elif is_ts_V(a):
-#         return V(apply_unary_ts_fcn(f, a.value), get_cf(a))
-#     else:
-#         return V(f(get_val(a)), get_cf(a))
+def TimeSeriesMap(f, a):
+    if is_none(a) or is_stub(a):
+        return a
+    elif is_ts_V(a):
+        return V(apply_unary_ts_fcn(f, a.value), get_cf(a))
+    else:
+        return V(f(get_val(a)), get_cf(a))
 #
 #
 # def TimeSeriesMergeMap(f, *args):
@@ -339,6 +339,39 @@ def more_internal_or(a, b, cfa, cfb):
 # TODO: Implement lazy evaluation so args are only invoked as needed
 def If(*args):
     return internal_if(1, *args)
+    # return process_unary(lambda x: internal_if2(1, x), time_series_thread(*args))
+
+
+def time_series_thread2(*args):
+    return V(traces.TimeSeries.merge([to_traces_ts(a) for a in args]))
+
+
+def internal_if2(cf, args):
+
+    # "ELSE" - Return the default value
+    if len(args) == 1:
+        return _box(args[0], min(cf, get_cf(args[0])))
+
+    # "IF" - If the test evaluates to True
+
+    # First catch Stub and None
+    tst = get_val(args[0])
+    if is_stub(tst):
+        return args[0]
+    elif is_none(tst):
+        if is_stub(args[1]):
+            return args[1]
+        else:
+            return args[0]
+
+    # Does test evaluate to True?
+    if tst:
+        # "THEN"
+        return _box(args[1], min(cf, get_cf(args[0]), get_cf(args[1])))
+
+    # Compress the expression and recurse
+    else:
+        return internal_if(min(cf, get_cf(args[0])), args[2:])
 
 
 def internal_if(cf, *args):

@@ -167,3 +167,12 @@ def AsOf(ts, dt):
 def DateRange(start=None, end=None, periods=None, freq=None):
     return list(map(lambda x: x.date().isoformat(),
                     pd.date_range(start=start, end=end, periods=periods, freq=freq).to_pydatetime()))
+
+
+# TODO...
+
+# def BalancingTest(*args):
+#     score = Total(Map(lambda x, y: Bool(x) * y, Partition(args, 2)))
+#     limit = If(score < 0, x, y)
+#     return RescaleCF(Bool(score), score/limit)
+
