@@ -1,7 +1,5 @@
 from dsl import *
 
-from datetime import datetime
-
 
 # RULES
 
@@ -27,7 +25,7 @@ def another_rule(p):
 # Federal minimum wage for all covered, nonexempt workers
 # Source: https://www.dol.gov/whd/minwage/chart.htm
 def fed_min_wage():
-    return TS({DawnOfTime: Stub(),
+    return TS({Dawn: Stub,
                '1997-09-01': 5.15,
                '2007-07-24': 5.85,
                '2008-07-24': 6.55,
@@ -82,4 +80,6 @@ def hourly_wage(p):
 
 
 # result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
-
+print(
+Pretty(TimeSeries({1: Value(5)}))
+)

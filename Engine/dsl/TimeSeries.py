@@ -1,10 +1,12 @@
+from dsl.basic import *
 from dsl.helpers import *
 from dsl.Value import *
 
 
 # The dawn of time
 Dawn = '0001-01-01'
-
+AssessmentStart = '2018-01-01'
+AssessmentEnd = '2020-12-31'
 
 # Internal representation of a time series
 # Dates are ordinals (integers representing the day)
@@ -35,6 +37,51 @@ class TimeSeries:
                 self.dict = contents
         else:
             self.dict = {1: contents}
+
+    # Arithmetic...
+    def __add__(self, o):
+        return process_binary_ts(internal_add, self, o)
+
+    def __radd__(self, o):
+        return process_binary_ts(internal_add, self, o)
+
+    def __sub__(self, o):
+        return process_binary_ts(internal_sub, self, o)
+
+    def __rsub__(self, o):
+        return process_binary_ts(internal_sub, o, self)
+
+    def __mul__(self, o):
+        return process_binary_ts(internal_mul, self, o)
+
+    def __rmul__(self, o):
+        return process_binary_ts(internal_mul, self, o)
+
+    def __truediv__(self, o):
+        return process_binary_ts(internal_div, self, o)
+
+    def __rtruediv__(self, o):
+        return process_binary_ts(internal_div, o, self)
+
+    # Comparison...
+    def __lt__(self, o):
+        return process_binary_ts(internal_lt, self, o)
+
+    def __le__(self, o):
+        return process_binary_ts(internal_lt, self, o)
+
+    def __eq__(self, o):
+        # Hacking equality == playing with fire
+        return process_binary_ts(internal_eq, self, o)
+
+    def __ne__(self, o):
+        return Not((self == o))
+
+    def __gt__(self, o):
+        return process_binary_ts(internal_gt, self, o)
+
+    def __ge__(self, o):
+        return process_binary_ts(internal_ge, self, o)
 
 
 # Get the value of a time series on a given day
@@ -72,8 +119,10 @@ def internal_ts_map_binary_fcn(f, ts: dict):
 
 # Apply a binary function to two TimeSeries objects
 # Output: TimeSeries
-def internal_binary_fcn(f, ts1: TimeSeries, ts2: TimeSeries):
-    pairs = internal_ts_sort(internal_ts_thread(ts1.dict, ts2.dict))
+def process_binary_ts(f, ts1: TimeSeries, ts2: TimeSeries):
+    t1 = try_converting_to_ts(ts1).dict
+    t2 = try_converting_to_ts(ts2).dict
+    pairs = internal_ts_sort(internal_ts_thread(t1, t2))
     return TimeSeries(internal_ts_trim(internal_ts_map_binary_fcn(f, pairs)))
 
 
@@ -109,13 +158,22 @@ def internal_ts_from_keys_vals(keys: list, values: list):
     return dict(zip(keys, values))
 
 
+# If item is a Value object, return it; otherwise convert it to a Value object
+# Output: TimeSeries
+def try_converting_to_ts(a):
+    if isinstance(a, TimeSeries):
+        return a
+    else:
+        return TimeSeries(a)
+
+
 # INSTANTIATE A TIME SERIES
 
 
 # Public constructor of a legal TimeSeries
 # Converts string dates to ordinal dates, and scalars to Value objects
 # Output: TimeSeries
-def TS2(dct: dict):
+def TS(dct: dict):
     return TimeSeries(internal_ts_trim({str_date_to_ordinal(x[0]): try_converting_to_val(x[1]) for x in dct.items()}))
 
 
@@ -126,7 +184,7 @@ def TS2(dct: dict):
 # Output: string
 def Pretty(ts: TimeSeries):
     if len(ts.dict) == 1:
-        return list(ts.dict.values())[0]
+        return list(ts.dict.values())[0].pretty()
     else:
         s = '<TimeSeries>\n'
         for k, v in ts.dict.items():

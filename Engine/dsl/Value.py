@@ -46,7 +46,7 @@ Stub = Value("Stub", stub=True)
 
 
 # Internal, static processing of most binary operators
-def internal_process_binary(f, a_in: Value, b_in: Value):
+def process_binary_val(f, a_in: Value, b_in: Value):
 
     # Ensure that inputs are Value objects
     a = try_converting_to_val(a_in)

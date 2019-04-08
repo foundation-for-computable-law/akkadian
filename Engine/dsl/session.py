@@ -1,13 +1,12 @@
-from datetime import date
 from dsl.facts import *
-from dsl.V import *
+from dsl.temporal import *
 
 
 # Generates an interactive interview to collect info to resolve a goal
 def Investigate(goals: list, fs=[]):
 
     # Call the "apply rules" interface
-    re = Apply_rules(goals, fs)
+    re = ApplyRules(goals, fs)
 
     # If all of the goals have been determined, present the results
     if re["complete"]:
@@ -32,7 +31,7 @@ def Investigate(goals: list, fs=[]):
 # Assumes dates are entered as yyyy-mm-dd
 def convert_input(typ: str, val: str):
     if val in ("Stub", "stub"):
-        return Stub()
+        return Stub
     elif typ == "num":
         return float(val)
     elif typ == "date":
@@ -52,7 +51,7 @@ def convert_input(typ: str, val: str):
 # Returns a determination or a list of needed information
 # TODO: Goals should be tuples containing a function reference, rather than a string
 # Each goal is entered as a string, for example: "module.fcn('jim')"
-def Apply_rules(goals: list, fs=[]):
+def ApplyRules(goals: list, fs=[]):
 
     # Load namespaces
     for goal in goals:
@@ -71,7 +70,6 @@ def Apply_rules(goals: list, fs=[]):
     progress = len(facts) / max(len(facts) + len(missing_info), 1)
 
     # Have all of the goals been determined?
-    # complete = all(map(lambda x: x.value is not None, results))
     complete = all(map(lambda x: goal_is_determined(x), results))
 
     # For each result, format it as a dictionary
@@ -92,11 +90,8 @@ def Apply_rules(goals: list, fs=[]):
 
 
 # Determines whether a goal has been determined such that the interview can stop
-def goal_is_determined(goal: V):
-    if is_ts_V(goal):
-        return ts_is_known(goal.value)
-    else:
-        return goal.value is not None
+def goal_is_determined(goal: TimeSeries):
+    return not any([x.value == "Null" for x in goal.dict.values()])
 
 
 # Gets the value for a fact
@@ -113,11 +108,11 @@ def In(typ: str, name: str, subj, obj, question=None):
             missing_info.append([typ, name, subj, obj, text_subst(subj, obj, question)])
 
         # Indicate lack of knowledge
-        return V(None)
+        return Eternal(Null)
 
     # If the fact is known, return its value
     else:
-        return V(lookup[0].value)
+        return Eternal(lookup[0].value)
 
 
 # Substitute the subject ({0}) and object ({1}) of a fact into the question text
@@ -128,12 +123,11 @@ def text_subst(sbj: str, obj: str, question: str):
         return question.format(sbj, obj) + " "
 
 
-# Given a V object, format its values into a dictionary
-def process_results(result : V):
+# Format results into a dictionary
+def process_results(result: TimeSeries):
     return {
-        "result": result.value,
-        "certainty": result.cf,
-        # "msg": result.pretty(),
+        # "result": result.value,
+        # "certainty": result.cf,
         "msg": Pretty(result),
-        "complete": result.value is not None
+        "complete": result is not Null
     }

@@ -1,4 +1,5 @@
 from datetime import date
+from dsl.temporal import *
 
 
 # A convenience function to make date construction less verbose
@@ -8,4 +9,4 @@ def Date(y: int, m: int, d: int):
 
 
 # Returns the current date
-Now = date.today().isoformat()
+Now = Eternal(date.today().isoformat())
