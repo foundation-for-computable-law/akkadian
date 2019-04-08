@@ -1,178 +1,134 @@
-from datetime import date, timedelta, datetime
-from dateutil.relativedelta import relativedelta
-import math
+from dsl.helpers import *
+from dsl.Value import *
+
+
+# The dawn of time
+Dawn = '0001-01-01'
 
-# from numpy import timedelta64, datetime64
 
-import pandas as pd
+# Internal representation of a time series
+# Dates are ordinals (integers representing the day)
+# Values are Value objects
+# ts1 = {
+#     1: Value(8234),
+#     234: Value(921),
+#     1351: Value(44)
+# }
 
-from dsl.V import *
 
+# Internal representation of the data
+# Not instantiated directly by users
+class TimeSeries:
+    def __init__(self, contents):
 
-# DATE ARITHMETIC: Add___
+        # Dictionary of the time series data
+        if type(contents) is dict:
 
-# Determine the date n days from a given date
-def AddDays(d, n):
-    return process_binary(lambda x, y: _add_days(x, y), d, n)
+            # Add a Null entry for the dawn of time, if that entry is missing
+            if 1 not in contents:
+                d = contents
+                d.update({1: Null})
+                self.dict = internal_ts_sort(d)
 
+            # Otherwise, take the dictionary as it is
+            else:
+                self.dict = contents
+        else:
+            self.dict = {1: contents}
 
-# Scalar version of AddDays (for internal use only)
-def _add_days(d, n):
-    return (date.fromisoformat(d) + timedelta(days=n)).isoformat()
 
+# Get the value of a time series on a given day
+# Output: Value
+def internal_asof(dt: int, ts: dict):
+    last = 0
+    for key, value in ts.items():
+        if dt >= last and dt < key:
+            return ts[last]
+        else:
+            last = key
+    return ts[list(ts)[-1]]
 
-# Determine the date n weeks from a given date
-def AddWeeks(d, n):
-    return process_binary(lambda x, y: _add_weeks(x, y), d, n)
 
+# Merge two time series together
+# Output: dictionary
+def internal_ts_thread(ts1: dict, ts2: dict):
+    new_keys = list(set(list(ts1.keys()) + list(ts2.keys())))
+    return {x: [internal_asof(x, ts1), internal_asof(x, ts2)] for x in new_keys}
 
-# Scalar version of AddWeeks (for internal use only)
-def _add_weeks(d, n):
-    return (date.fromisoformat(d) + timedelta(weeks=n)).isoformat()
 
+# Map a unary function to the values of a time series dictionary
+# Output: dictionary
+def internal_ts_map_unary_fcn(f, ts: dict):
+    vals = [f(x) for x in ts.values()]
+    return internal_ts_from_keys_vals(ts.keys(), vals)
 
-# Determine the date n months from a given date
-def AddMonths(d, n):
-    return process_binary(lambda x, y: _add_months(x, y), d, n)
 
+# Map a binary function to the values of a time series dictionary
+# Output: dictionary
+def internal_ts_map_binary_fcn(f, ts: dict):
+    vals = [f(x, y) for [x, y] in ts.values()]
+    return internal_ts_from_keys_vals(ts.keys(), vals)
 
-# Scalar version of AddMonths (for internal use only)
-def _add_months(d, n):
-    return (date.fromisoformat(d) + relativedelta(months=n)).isoformat()
 
+# Apply a binary function to two TimeSeries objects
+# Output: TimeSeries
+def internal_binary_fcn(f, ts1: TimeSeries, ts2: TimeSeries):
+    pairs = internal_ts_sort(internal_ts_thread(ts1.dict, ts2.dict))
+    return TimeSeries(internal_ts_trim(internal_ts_map_binary_fcn(f, pairs)))
 
-# Determine the date n years from a given date
-def AddYears(d, n):
-    return process_binary(lambda x, y: _add_years(x, y), d, n)
 
+# Remove redundant intervals
+# Output: dictionary
+def internal_ts_trim(ts: dict):
+    previous_value = Value(-1)
+    redundant = []
+    for time, value in ts.items():
+        if internal_should_be_merged(value, previous_value):
+            redundant.append(time)
+        previous_value = value
+    for time in redundant:
+        del ts[time]
+    return ts
 
-# Scalar version of AddMonths (for internal use only)
-def _add_years(d, n):
-    return (date.fromisoformat(d) + relativedelta(years=n)).isoformat()
 
+# Determines whether a time series entry is redundant
+# Output: Boolean
+def internal_should_be_merged(a: Value, b: Value):
+    return values_are_equivalent(a, b)
 
-# DATE ARITHMETIC: ___Delta
-# Currently does later - earlier and then converts to the desired interval
 
+# Sort the time series dictionary by its (integer) keys
+# Output: dictionary
+def internal_ts_sort(ts: dict):
+    return {x: ts[x] for x in sorted(ts.keys())}
 
-# Determine the number of days between two dates
-def DayDelta(earlier, later):
-    return process_binary(lambda x, y: _day_delta(x, y), earlier, later)
 
+# Build a time series dictionary from lists of keys and values
+# Output: dictionary
+def internal_ts_from_keys_vals(keys: list, values: list):
+    return dict(zip(keys, values))
 
-# Scalar version of DayDelta (for internal use only)
-def _day_delta(earlier, later):
-    return (date.fromisoformat(later) - date.fromisoformat(earlier)).days
 
+# INSTANTIATE A TIME SERIES
 
-# Determine the number of weeks between two dates
-def WeekDelta(earlier, later):
-    return DayDelta(earlier, later) / 7
 
+# Public constructor of a legal TimeSeries
+# Converts string dates to ordinal dates, and scalars to Value objects
+# Output: TimeSeries
+def TS2(dct: dict):
+    return TimeSeries(internal_ts_trim({str_date_to_ordinal(x[0]): try_converting_to_val(x[1]) for x in dct.items()}))
 
-# def month_delta(earlier, later):
-#     delta = relativedelta(date.fromisoformat(later), date.fromisoformat(earlier))
-#     return delta.years * 12 + delta.months + (delta.days / 30)
 
+# DISPLAYING TIME SERIES
 
-# DECOMPOSING A DATE
 
-def Year(dt):
-    return process_unary(lambda x: date.fromisoformat(x).year, dt)
-
-
-def Month(dt):
-    return process_unary(lambda x: date.fromisoformat(x).month, dt)
-
-
-def Day(dt):
-    return process_unary(lambda x: date.fromisoformat(x).day, dt)
-
-
-# MATH
-# These functions are the time series versions of those in the Python math library
-
-
-# Time series version of math.ceil(x)
-def Ceil(x):
-    return process_unary(math.ceil, x)
-
-
-# Time series version of math.floor(x)
-def Floor(x):
-    return process_unary(math.floor, x)
-
-
-# Time series version of math.remainder(x, y)
-def Remainder(x, y):
-    return process_binary(lambda a, b: math.remainder(a, b), x, y)
-
-
-# Time series version of math.trunc(x)
-def Trunc(x):
-    return process_unary(math.trunc, x)
-
-
-# Time series version of math.exp(x)
-def Exp(x):
-    return process_unary(math.exp, x)
-
-
-# Time series version of math.log(x[, base])
-def Log(x, base=math.e):
-    return process_binary(lambda a, b: math.log(a, b), x, base)
-
-
-# Time series version of math.pow(x, y)
-def Pow(x, y):
-    return process_binary(lambda a, b: math.pow(a, b), x, y)
-
-
-# For consistency...
-E = math.e
-
-
-# CREATING BOOLEAN TIME SERIES
-
-
-# Boolean time series that's true starting on a given date, and otherwise false
-def EffectiveFrom(dt):
-    return TS({DawnOfTime: False, dt: True})
-
-
-# Boolean time series that's true up until a given date, and otherwise false
-# TODO: Use AddDays once time series can be declared with V objects as dates
-def EffectiveUntil(dt):
-    return TS({DawnOfTime: True, _add_days(dt, 1): False})
-
-
-# Boolean time series that's true between two dates, and otherwise false
-def EffectiveBetween(start, end):
-    return And(EffectiveFrom(start), EffectiveUntil(end))
-
-
-# EXTRACTING VALUES FROM A TIME SERIES
-
-
-# Value of a time series on a given date
-# The implementation uses the "traces" Python package
-# TODO: Handle uncertainty
-def AsOf(ts, dt):
-    return ts[dt]
-
-
-# TIME SERIES COMPONENTS
-
-
-def DateRange(start=None, end=None, periods=None, freq=None):
-    return list(map(lambda x: x.date().isoformat(),
-                    pd.date_range(start=start, end=end, periods=periods, freq=freq).to_pydatetime()))
-
-
-# TODO...
-
-# def BalancingTest(*args):
-#     score = Total(Map(lambda x, y: Bool(x) * y, Partition(args, 2)))
-#     limit = If(score < 0, x, y)
-#     return RescaleCF(Bool(score), score/limit)
-
+# Generates a string that explains what's in the TimeSeries object
+# Output: string
+def Pretty(ts: TimeSeries):
+    if len(ts.dict) == 1:
+        return list(ts.dict.values())[0]
+    else:
+        s = '<TimeSeries>\n'
+        for k, v in ts.dict.items():
+            s += " " + ordinal_to_str_date(k) + ": " + v.pretty() + "\n"
+        return s + '</TimeSeries>'
