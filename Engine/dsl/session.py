@@ -49,13 +49,9 @@ def convert_input(typ: str, val: str):
 
 # Applies substantive rules to a fact pattern
 # Returns a determination or a list of needed information
-# TODO: Goals should be tuples containing a function reference, rather than a string
-# Each goal is entered as a string, for example: "module.fcn('jim')"
+# Each goal is entered as a tuple containing the function name and arguments
+# For example: (is_eligible, "Bertie") or (is_qualifying_relative, "Jim", "Lucy")
 def ApplyRules(goals: list, fs=[]):
-
-    # Load namespaces
-    for goal in goals:
-        exec("import " + goal[0:goal.find('.')]) # Note: causes the imported module to be reevaluated
 
     # Clear and reload data structures
     missing_info.clear()
@@ -64,7 +60,8 @@ def ApplyRules(goals: list, fs=[]):
         facts.append(item)
 
     # Evaluate goals (causing missing_info to be reloaded)
-    results = list(map(eval, goals))
+    # results = list(map(eval, goals))
+    results = list(map(execute_fcn, goals))
 
     # Estimate interview progress
     progress = len(facts) / max(len(facts) + len(missing_info), 1)
@@ -87,6 +84,14 @@ def ApplyRules(goals: list, fs=[]):
         "results": result_blocks,
         "missing_info": [] if complete else missing_info
     }
+
+
+# Execute the function, given a list of its name and arguments
+def execute_fcn(i):
+    if len(i) == 3:
+        return i[0](i[1], i[2])
+    else:
+        return i[0](i[1])
 
 
 # Determines whether a goal has been determined such that the interview can stop

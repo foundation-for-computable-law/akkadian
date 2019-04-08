@@ -64,22 +64,19 @@ def hourly_wage(p):
 
 
 # Getting the value of a fact
-# fact("gender","jim").value
-# fact("relationship","jim","jane").value
+# Fact("gender", "jim").value
+# Fact("relationship", "jim", "jane").value
 
 # Invoking rules
-# is_qualifying_relative("jim","jane").value
+# Pretty(is_qualifying_relative("jim", "jane"))
 
 # Apply the rules to a fact pattern
-# print(Apply_rules(['sandbox.is_qualifying_relative("Jim","Lucy")','sandbox.another_rule("Lucy")']))
+# print(ApplyRules([(is_qualifying_relative, "Jim", "Lucy"), (another_rule, "Lucy")]))
 
 # Initiate an interactive interview
-# Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'],[Fact("assessment_date", None, None, Date(1999,1,1))])
-# Investigate(['sandbox.is_qualifying_relative("Jim","Lucy")'])
-# Investigate(['sandbox.another_rule("Neela")'])
+# Investigate([(is_qualifying_relative, "Jim", "Lucy")],[Fact("assessment_date", None, None, '2020-02-02')])
+# Investigate([(is_qualifying_relative, "Jim", "Lucy")])
+# Investigate([(another_rule, "Neela")])
 
 
 # result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
-print(
-Pretty(TimeSeries({1: Value(5)}))
-)
