@@ -2,3 +2,4 @@
 *.pyc
 meeting notes.txt
 Engine/.vscode/settings.json
+.vscode/settings.json
