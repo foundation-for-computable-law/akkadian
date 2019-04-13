@@ -1,4 +1,4 @@
-from dsl import *
+from akkadian import *
 
 
 # RULES
