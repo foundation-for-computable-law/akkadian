@@ -115,70 +115,39 @@ def internal_or(a_in: Value, b_in: Value):
 # and also of the CF of the return value
 # TODO: Time series
 # TODO: Implement lazy evaluation so args are only invoked as needed
-# def If(*args):
-#     return internal_if(1, *args)
-#     # return process_unary(lambda x: internal_if2(1, x), time_series_thread(*args))
-#
-#
-# def time_series_thread2(*args):
-#     return V(traces.TimeSeries.merge([to_traces_ts(a) for a in args]))
-#
-#
-# def internal_if2(cf, args):
-#
-#     # "ELSE" - Return the default value
-#     if len(args) == 1:
-#         return _box(args[0], min(cf, get_cf(args[0])))
-#
-#     # "IF" - If the test evaluates to True
-#
-#     # First catch Stub and None
-#     tst = get_val(args[0])
-#     if is_stub(tst):
-#         return args[0]
-#     elif is_none(tst):
-#         if is_stub(args[1]):
-#             return args[1]
-#         else:
-#             return args[0]
-#
-#     # Does test evaluate to True?
-#     if tst:
-#         # "THEN"
-#         return _box(args[1], min(cf, get_cf(args[0]), get_cf(args[1])))
-#
-#     # Compress the expression and recurse
-#     else:
-#         return internal_if(min(cf, get_cf(args[0])), args[2:])
-#
-#
-# def internal_if(cf, *args):
-#
-#     # "ELSE" - Return the default value
-#     if len(args) == 1:
-#         return _box(args[0], min(cf, get_cf(args[0])))
-#
-#     # "IF" - If the test evaluates to True
-#
-#     # First catch Stub and None
-#     tst = get_val(args[0])
-#     if is_stub(tst):
-#         return args[0]
-#     elif is_none(tst):
-#         if is_stub(args[1]):
-#             return args[1]
-#         else:
-#             return args[0]
-#
-#     # Does test evaluate to True?
-#     if tst:
-#         # "THEN"
-#         return _box(args[1], min(cf, get_cf(args[0]), get_cf(args[1])))
-#
-#     # Compress the expression and recurse
-#     else:
-#         return internal_if(min(cf, get_cf(args[0])), *args[2:])
-#
+def If(*args):
+    return internal_if(1, *args)
+
+
+def internal_if(cf, *args):
+
+    arg0 = try_converting_to_val(args[0])
+
+    # "ELSE" - Return the default value
+    if len(args) == 1:
+        return Value(arg0.value, cf=min(cf, arg0.cf))
+
+    # "IF" - If the test evaluates to True
+
+    # First catch Stub and None
+    if arg0.is_stub:
+        return arg0
+    elif arg0.is_null:
+        arg1 = try_converting_to_val(args[1])
+        if arg1.is_stub:
+            return arg1
+        else:
+            return arg0
+
+    # Does test evaluate to True?
+    if arg0.value:
+        # "THEN"
+        arg1 = try_converting_to_val(args[1])
+        return Value(arg1.value, cf=min(cf, arg0.cf, arg1.cf))
+
+    # Compress the expression and recurse
+    else:
+        return internal_if(min(cf, arg0.cf), *args[2:])
 
 
 # CONSTRUCTING BOOLEAN TIME SERIES

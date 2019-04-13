@@ -704,7 +704,7 @@ class TestDSL(unittest.TestCase):
     def test_cf_and_21(self):
         self.assertEqual(internal_and(Value(False, .6), Value(False, .4)).cf, .6)
 
-    # def test_cf_and_22(self):
+    def test_cf_and_22(self):
         self.assertEqual(internal_and(Value("Null", cf=.6, null=True), Value("Null", cf=.4, null=True)).cf, .6)
 
     def test_cf_and_23(self):
@@ -966,31 +966,67 @@ class TestDSL(unittest.TestCase):
     def test_pretty_1(self):
         self.assertEqual(Pretty(TimeSeries({1: Value(5)})), "5 (100% certain)")
 
-    #
-    # # IF
-    #
-    # def test_if_1(self):
-    #     self.assertEqual(If(V(None), 1, 2).value, None)
-    #
-    # def test_if_2(self):
-    #     self.assertEqual(If(V(True), 1, 2).value, 1)
-    #
-    # def test_if_3(self):
-    #     self.assertEqual(If(True, 1, 2).value, 1)
-    #
-    # def test_if_4(self):
-    #     self.assertEqual(If(V(False), 1, 2).value, 2)
-    #
-    # def test_if_5(self):
-    #     self.assertEqual(If(False, 1, 2).value, 2)
-    #
-    # def test_if_6(self):
-    #     self.assertEqual(If(Stub(), 1, 2).value, StubVal)
-    #
-    # def test_if_7(self):
-    #     self.assertEqual(If(True, Stub(), 2).value, StubVal)
 
-    #
+    # If
+
+    def test_if_1(self):
+        self.assertEqual(If(Null, 1, 2).value, "Null")
+
+    def test_if_2(self):
+        self.assertEqual(If(Value(True), 1, 2).value, 1)
+
+    def test_if_3(self):
+        self.assertEqual(If(True, 1, 2).value, 1)
+
+    def test_if_4(self):
+        self.assertEqual(If(Value(False), 1, 2).value, 2)
+
+    def test_if_5(self):
+        self.assertEqual(If(False, 1, 2).value, 2)
+
+    def test_if_6(self):
+        self.assertEqual(If(Stub, 1, 2).value, "Stub")
+
+    def test_if_7(self):
+        self.assertEqual(If(True, Stub, 2).value, "Stub")
+
+    # If (CFs)
+
+    def test_if_cf_1(self):
+        self.assertEqual(If(Value(True,.8), Value(1, .9),
+                            Value(True,.3), Value(1, .5),
+                            Value(True,.6), Value(1, .2)).cf, .8)
+
+    def test_if_cf_2(self):
+        self.assertEqual(If(Value(True,.8), Value(1, .2),
+                            Value(True,.3), Value(1, .5),
+                            Value(True,.6), Value(1, .2)).cf, .2)
+
+    def test_if_cf_3(self):
+        self.assertEqual(If(Value(False,.8), Value(1, .9),
+                            Value(True,.3), Value(1, .5),
+                            Value(True,.6), Value(1, .2)).cf, .3)
+
+    def test_if_cf_4(self):
+        self.assertEqual(If(Value(False,.8), Value(1, .9),
+                            Value(True,.6), Value(1, .5),
+                            Value(True,.6), Value(1, .2)).cf, .5)
+
+    def test_if_cf_5(self):
+        self.assertEqual(If(Value(False,.8), Value(1, .9),
+                            Value(False,.6), Value(1, .5),
+                            Value(True,.6), Value(1, .2)).cf, .2)
+
+    def test_if_cf_6(self):
+        self.assertEqual(If(Value(False,.8), Value(1, .9),
+                            Value(False,.1), Value(1, .5),
+                            Value(True,.6), Value(1, .2)).cf, .1)
+
+    def test_if_cf_7(self):
+        self.assertEqual(If(Value(False,.8), Value(1, .9),
+                            Value(False,.6), Value(1, .5),
+                            Value(True,.5), Value(1, .9)).cf, .5)
+
     # # MAP
     #
     # def test_map_1(self):
