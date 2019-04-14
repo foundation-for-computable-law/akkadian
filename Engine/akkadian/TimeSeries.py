@@ -110,6 +110,16 @@ def internal_ts_map_unary_fcn(f, ts: dict):
     return internal_ts_trim(internal_compose_ts(ts.keys(), vals))
 
 
+# Apply a unary function to a Value object
+# Output: Value
+def internal_process_unary_fcn_val(f, a_in: Value):
+    a = try_converting_to_val(a_in)
+    if a.is_stub or a.is_null:
+        return a
+    else:
+        return Value(f(a.value), cf=a.cf)
+
+
 # Map a binary function to the values of a time series dictionary
 # Output: dictionary
 def internal_ts_map_binary_fcn(f, ts: dict):

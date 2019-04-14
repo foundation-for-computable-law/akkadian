@@ -1233,10 +1233,29 @@ class TestDSL(unittest.TestCase):
 
     # Simple mathematical functions
 
-    # def test_math_1(self):
-    #     self.assertEqual(Pretty(Ceil(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5}))),
-    #                      Pretty(TS({Dawn: 1})))
+    def test_math_1(self):
+        self.assertEqual(Pretty(Ceil(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5}))),
+                         Pretty(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5})))
 
+    def test_math_2(self):
+        self.assertEqual(Pretty(Ceil(TS({Dawn: 3.5, '2003-04-02': Stub, '2009-03-04': 5.0}))),
+                         Pretty(TS({Dawn: 4, '2003-04-02': Stub, '2009-03-04': 5})))
+
+    def test_math_3(self):
+        self.assertEqual(Pretty(Ceil(Eternal(3.4))),
+                         Pretty(Eternal(4)))
+
+    def test_math_4(self):
+        self.assertEqual(Pretty(Ceil(3.4)),
+                         Pretty(Eternal(4)))
+
+    def test_math_5(self):
+        self.assertEqual(Pretty(Floor(3.4)),
+                         Pretty(Eternal(3)))
+
+    def test_math_6(self):
+        self.assertEqual(Pretty(Pow(TS({Dawn: 2, '2003-04-02': Stub, '2009-03-04': 3}), 2)),
+                         Pretty(TS({Dawn: 4.0, '2003-04-02': Stub, '2009-03-04': 9.0})))
 
 
 # Used to test time series logic

@@ -372,44 +372,76 @@ def Ceil(ts):
     return TimeSeries(internal_ts_map_unary_fcn(internal_math_ceil, try_converting_to_ts(ts).dict))
 
 
-# Internal, static version of the GetCF function
+# Internal, static version of the Ceil function
 # Output: Value
-def internal_math_ceil(a_in: Value):
-    return 0
-    # a = try_converting_to_val(a_in)
-    # setattr(v, 'value', math.ceil(v.value))
-    # return Value(math.ceil(a.value), cf=)
-
+def internal_math_ceil(a: Value):
+    return internal_process_unary_fcn_val(math.ceil, a)
 
 
 # Time series version of math.floor(x)
-# def Floor(x):
-#     return process_unary(math.floor, x)
+# Output: TimeSeries
+def Floor(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_math_floor, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Ceil function
+# Output: Value
+def internal_math_floor(a: Value):
+    return internal_process_unary_fcn_val(math.floor, a)
 
 
 # Time series version of math.remainder(x, y)
+# Output: TimeSeries
 # def Remainder(x, y):
 #     return process_binary(lambda a, b: math.remainder(a, b), x, y)
 
 
 # Time series version of math.trunc(x)
-# def Trunc(x):
-#     return process_unary(math.trunc, x)
+# Output: TimeSeries
+def Trunc(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_math_trunc, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Trunc function
+# Output: Value
+def internal_math_trunc(a: Value):
+    return internal_process_unary_fcn_val(math.trunc, a)
 
 
 # Time series version of math.exp(x)
-# def Exp(x):
-#     return process_unary(math.exp, x)
+# Output: TimeSeries
+def Exp(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_math_exp, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Trunc function
+# Output: Value
+def internal_math_exp(a: Value):
+    return internal_process_unary_fcn_val(math.exp, a)
 
 
 # Time series version of math.log(x[, base])
-# def Log(x, base=math.e):
-#     return process_binary(lambda a, b: math.log(a, b), x, base)
+# Output: TimeSeries
+def Log(x, base=math.e):
+    return process_binary_ts(_log_values, x, y)
+
+
+# Internal, static version of the Log function
+# Output: Value
+def _log_values(x: Value, y: Value):
+    return process_binary_val(math.log, x, y)
 
 
 # Time series version of math.pow(x, y)
-# def Pow(x, y):
-#     return process_binary(lambda a, b: math.pow(a, b), x, y)
+# Output: TimeSeries
+def Pow(x, y):
+    return process_binary_ts(_pow_values, x, y)
+
+
+# Internal, static version of the Pow function
+# Output: Value
+def _pow_values(x: Value, y: Value):
+    return process_binary_val(math.pow, x, y)
 
 
 # For consistency...

@@ -81,5 +81,5 @@ def hourly_wage(p):
 
 # result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
 
-print( Pretty(TS({Dawn: Value(3, cf=.2), '2003-04-02': Value(4, cf=.2), '2005-04-02': Value(4, cf=.8)})))
+print( math.pow(5, 2))
 
