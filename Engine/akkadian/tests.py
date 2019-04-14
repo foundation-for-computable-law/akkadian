@@ -1151,6 +1151,61 @@ class TestDSL(unittest.TestCase):
     # def test_forall_2(self):
     #     self.assertEqual(ForAll(lambda x: x > 1, V([3, 5, 8])).value, True)
 
+    # ComposeTS
+
+    def test_compose_ts_1(self):
+        self.assertEqual(Pretty(ComposeTS([Dawn,'2003-04-02','2009-03-04'], [3,4,5])),
+                         Pretty(TS({Dawn: 3, '2003-04-02': 4, '2009-03-04': 5})))
+
+    # IsNull
+
+    def test_is_null_1(self):
+        self.assertEqual(Pretty(IsNull(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5}))),
+                         Pretty(TS({Dawn: False, '2003-04-02': True, '2009-03-04': False})))
+
+    def test_is_null_2(self):
+        self.assertEqual(Pretty(IsNull(TS({Dawn: 3, '2003-04-02': 4, '2009-03-04': 5}))),
+                         Pretty(TS({Dawn: False})))
+
+    def test_is_null_3(self):
+        self.assertEqual(Pretty(IsNull(TS({Dawn: Null}))),
+                         Pretty(TS({Dawn: True})))
+
+    # Manipulating CFs
+
+    def test_get_cf_1(self):
+        self.assertEqual(Pretty(GetCF(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5}))),
+                         Pretty(TS({Dawn: 1})))
+
+    def test_get_cf_2(self):
+        self.assertEqual(Pretty(GetCF(TS({Dawn: Value(3,cf=.8), '2003-04-02': Value(3,cf=.2), '2009-03-04': Value(3,cf=.1)}))),
+                         Pretty(TS({Dawn: .8, '2003-04-02': .2, '2009-03-04': .1})))
+
+    def test_get_cf_3(self):
+        self.assertEqual(Pretty(GetCF(TS({Dawn: Value(3,cf=.2), '2003-04-02': Value(3,cf=.2), '2009-03-04': Value(3,cf=.2)}))),
+                         Pretty(Eternal(.2)))
+
+    def test_set_cf_1(self):
+        self.assertEqual(Pretty(SetCF(TS({Dawn: 3, '2003-04-02': 4}),
+                                      TS({Dawn: .2, '2005-04-02': .8}))),
+                         Pretty(TS({Dawn: Value(3, cf=.2), '2003-04-02': Value(4, cf=.2), '2005-04-02': Value(4, cf=.8)})))
+
+    def test_set_cf_2(self):
+        self.assertEqual(Pretty(SetCF(TS({Dawn: 3, '2003-04-02': 4}), Eternal(.7))),
+                         Pretty(TS({Dawn: Value(3, cf=.7), '2003-04-02': Value(4, cf=.7)})))
+
+    def test_set_cf_3(self):
+        self.assertEqual(Pretty(SetCF(TS({Dawn: 3, '2003-04-02': 4}), .7)),
+                         Pretty(TS({Dawn: Value(3, cf=.7), '2003-04-02': Value(4, cf=.7)})))
+
+    def test_set_cf_4(self):
+        self.assertEqual(Pretty(SetCF(234, .7)),
+                         Pretty(TS({Dawn: Value(234, cf=.7)})))
+
+    def test_rescale_cf_1(self):
+        self.assertEqual(Pretty(RescaleCF(TS({Dawn: Value(3, cf=1), '2003-04-02': Value(4, cf=.5)}), .5)),
+                         Pretty(TS({Dawn: Value(3, cf=.5), '2003-04-02': Value(4, cf=.25)})))
+
 
 # Used to test time series logic
 tsbool1 = TS({Dawn: False, '2020-01-01': True, '2021-01-01': Null})
