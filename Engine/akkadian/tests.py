@@ -1257,6 +1257,34 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Pretty(Pow(TS({Dawn: 2, '2003-04-02': Stub, '2009-03-04': 3}), 2)),
                          Pretty(TS({Dawn: 4.0, '2003-04-02': Stub, '2009-03-04': 9.0})))
 
+    # DayDelta
+
+    def test_day_delta_1(self):
+        self.assertEqual(Pretty(DayDelta('2000-01-01', TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))),
+                         Pretty(TS({Dawn: 1187, '2013-04-02': 8492})))
+
+    def test_day_delta_2(self):
+        self.assertEqual(Pretty(DayDelta('2000-01-01', '2000-01-03')),
+                         Pretty(Eternal(2)))
+
+    def test_day_delta_3(self):
+        self.assertEqual(Pretty(DayDelta('2000-01-01', Stub)),
+                         Pretty(Eternal(Stub)))
+
+    # Date decomposition
+
+    def test_date_decomp_1(self):
+        self.assertEqual(Pretty(Year(TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))),
+                         Pretty(TS({Dawn: 2003, '2013-04-02': 2023})))
+
+    def test_date_decomp_2(self):
+        self.assertEqual(Pretty(Month(TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))),
+                         Pretty(Eternal(4)))
+
+    def test_date_decomp_3(self):
+        self.assertEqual(Pretty(Day(TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))),
+                         Pretty(Eternal(2)))
+
 
 # Used to test time series logic
 tsbool1 = TS({Dawn: False, '2020-01-01': True, '2021-01-01': Null})

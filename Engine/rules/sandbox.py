@@ -81,5 +81,8 @@ def hourly_wage(p):
 
 # result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
 
-print( math.pow(5, 2))
+print(Pretty(
+
+DayDelta('2000-01-01', TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))
+))
 

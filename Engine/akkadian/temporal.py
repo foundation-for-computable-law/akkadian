@@ -319,28 +319,31 @@ def _simple_add_years(d: str, n: int):
     return (str_to_date(d) + relativedelta(years=n)).isoformat()
 
 
-
-
-
-
-
 # DATE ARITHMETIC: ___Delta
 # Currently does later - earlier and then converts to the desired interval
 
 
 # Determine the number of days between two dates
-# def DayDelta(earlier, later):
-#     return process_binary(lambda x, y: _day_delta(x, y), earlier, later)
+# Output: TimeSeries
+def DayDelta(earlier, later):
+    return process_binary_ts(_day_delta_values, earlier, later)
+
+
+# Internal, static version of the DayDelta function
+# Output: Value
+def _day_delta_values(earlier: Value, later: Value):
+    return process_binary_val(_day_delta, earlier, later)
 
 
 # Scalar version of DayDelta (for internal use only)
-# def _day_delta(earlier, later):
-#     return (date.fromisoformat(later) - date.fromisoformat(earlier)).days
+# Output: Integer
+def _day_delta(earlier, later):
+    return (date.fromisoformat(later) - date.fromisoformat(earlier)).days
 
 
 # Determine the number of weeks between two dates
-# def WeekDelta(earlier, later):
-#     return DayDelta(earlier, later) / 7
+def WeekDelta(earlier, later):
+    return DayDelta(earlier, later) / 7
 
 
 # def month_delta(earlier, later):
@@ -350,16 +353,41 @@ def _simple_add_years(d: str, n: int):
 
 # DECOMPOSING A DATE
 
-# def Year(dt):
-#     return process_unary(lambda x: date.fromisoformat(x).year, dt)
-#
-#
-# def Month(dt):
-#     return process_unary(lambda x: date.fromisoformat(x).month, dt)
-#
-#
-# def Day(dt):
-#     return process_unary(lambda x: date.fromisoformat(x).day, dt)
+
+# Given a date, return the year
+# Output: TimeSeries
+def Year(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_get_year, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Year function
+# Output: Value
+def internal_get_year(dt: Value):
+    return internal_process_unary_fcn_val(lambda x: date.fromisoformat(x).year, dt)
+
+
+# Given a date, return the month
+# Output: TimeSeries
+def Month(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_get_month, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Month function
+# Output: Value
+def internal_get_month(dt: Value):
+    return internal_process_unary_fcn_val(lambda x: date.fromisoformat(x).month, dt)
+
+
+# Given a date, return the day
+# Output: TimeSeries
+def Day(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_get_day, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the Day function
+# Output: Value
+def internal_get_day(dt: Value):
+    return internal_process_unary_fcn_val(lambda x: date.fromisoformat(x).day, dt)
 
 
 # MATH
