@@ -97,12 +97,6 @@ class TestDSL(unittest.TestCase):
     def test_internal_and_14(self):
         self.assertEqual(internal_and(False, Null).value, False)
 
-    # def test_internal_and_15(self):
-    #     self.assertEqual(internal_and2(False, Value(None), True).value, False)
-
-    # def test_internal_and_16(self):
-    #     self.assertEqual(internal_and2(False, "anything", True).value, False)
-
     def test_internal_and_17(self):
         self.assertEqual(internal_and(Stub, Value(True)).value, "Stub")
 
@@ -816,6 +810,9 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Pretty(And(Stub, False)),
                          Pretty(Eternal(False)))
 
+    def test_ts_and_7(self):
+        self.assertEqual(Pretty(And(False, Null, True)), Pretty(Eternal(False)))
+
     # Time series OR
 
     def test_ts_or_1(self):
@@ -914,6 +911,18 @@ class TestDSL(unittest.TestCase):
                          Pretty(TS({Dawn: False,
                                     '2020-01-01': True})))
 
+    def test_ts_cmp_2(self):
+        self.assertEqual(Pretty(TS({Dawn: 4, '2020-01-01': 8}) >= 5),
+                         Pretty(TS({Dawn: False, '2020-01-01': True})))
+
+    def test_ts_cmp_3(self):
+        self.assertEqual(Pretty(TS({Dawn: 4, '2020-01-01': 8}) >= 3),
+                         Pretty(TS({Dawn: True})))
+
+    def test_ts_cmp_4(self):
+        self.assertEqual(Pretty(Eternal(3) >= 3),
+                         Pretty(Eternal(True)))
+
     # AddDays
 
     def test_adddays_1(self):
@@ -967,65 +976,65 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Pretty(TimeSeries({1: Value(5)})), "5 (100% certain)")
 
 
-    # If
+    # if_for_values
 
     def test_if_1(self):
-        self.assertEqual(If(Null, 1, 2).value, "Null")
+        self.assertEqual(if_for_values(Null, 1, 2).value, "Null")
 
     def test_if_2(self):
-        self.assertEqual(If(Value(True), 1, 2).value, 1)
+        self.assertEqual(if_for_values(Value(True), 1, 2).value, 1)
 
     def test_if_3(self):
-        self.assertEqual(If(True, 1, 2).value, 1)
+        self.assertEqual(if_for_values(True, 1, 2).value, 1)
 
     def test_if_4(self):
-        self.assertEqual(If(Value(False), 1, 2).value, 2)
+        self.assertEqual(if_for_values(Value(False), 1, 2).value, 2)
 
     def test_if_5(self):
-        self.assertEqual(If(False, 1, 2).value, 2)
+        self.assertEqual(if_for_values(False, 1, 2).value, 2)
 
     def test_if_6(self):
-        self.assertEqual(If(Stub, 1, 2).value, "Stub")
+        self.assertEqual(if_for_values(Stub, 1, 2).value, "Stub")
 
     def test_if_7(self):
-        self.assertEqual(If(True, Stub, 2).value, "Stub")
+        self.assertEqual(if_for_values(True, Stub, 2).value, "Stub")
 
-    # If (CFs)
+    # if_for_values (CFs)
 
     def test_if_cf_1(self):
-        self.assertEqual(If(Value(True,.8), Value(1, .9),
-                            Value(True,.3), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .8)
+        self.assertEqual(if_for_values(Value(True,.8), Value(1, .9),
+                                       Value(True,.3), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .8)
 
     def test_if_cf_2(self):
-        self.assertEqual(If(Value(True,.8), Value(1, .2),
-                            Value(True,.3), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .2)
+        self.assertEqual(if_for_values(Value(True,.8), Value(1, .2),
+                                       Value(True,.3), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .2)
 
     def test_if_cf_3(self):
-        self.assertEqual(If(Value(False,.8), Value(1, .9),
-                            Value(True,.3), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .3)
+        self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
+                                       Value(True,.3), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .3)
 
     def test_if_cf_4(self):
-        self.assertEqual(If(Value(False,.8), Value(1, .9),
-                            Value(True,.6), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .5)
+        self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
+                                       Value(True,.6), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .5)
 
     def test_if_cf_5(self):
-        self.assertEqual(If(Value(False,.8), Value(1, .9),
-                            Value(False,.6), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .2)
+        self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
+                                       Value(False,.6), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .2)
 
     def test_if_cf_6(self):
-        self.assertEqual(If(Value(False,.8), Value(1, .9),
-                            Value(False,.1), Value(1, .5),
-                            Value(True,.6), Value(1, .2)).cf, .1)
+        self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
+                                       Value(False,.1), Value(1, .5),
+                                       Value(True,.6), Value(1, .2)).cf, .1)
 
     def test_if_cf_7(self):
-        self.assertEqual(If(Value(False,.8), Value(1, .9),
-                            Value(False,.6), Value(1, .5),
-                            Value(True,.5), Value(1, .9)).cf, .5)
+        self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
+                                       Value(False,.6), Value(1, .5),
+                                       Value(True,.5), Value(1, .9)).cf, .5)
 
     # # MAP
     #
@@ -1205,6 +1214,13 @@ class TestDSL(unittest.TestCase):
     def test_rescale_cf_1(self):
         self.assertEqual(Pretty(RescaleCF(TS({Dawn: Value(3, cf=1), '2003-04-02': Value(4, cf=.5)}), .5)),
                          Pretty(TS({Dawn: Value(3, cf=.5), '2003-04-02': Value(4, cf=.25)})))
+
+    # Simple mathematical functions
+
+    def test_math_1(self):
+        self.assertEqual(Pretty(GetCF(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5}))),
+                         Pretty(TS({Dawn: 1})))
+
 
 
 # Used to test time series logic

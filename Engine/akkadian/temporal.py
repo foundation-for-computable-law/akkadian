@@ -116,6 +116,10 @@ def internal_or(a_in: Value, b_in: Value):
 # TODO: Time series
 # TODO: Implement lazy evaluation so args are only invoked as needed
 def If(*args):
+    return Eternal(internal_if(1, *args))
+
+
+def if_for_values(*args):
     return internal_if(1, *args)
 
 
@@ -188,7 +192,7 @@ def Eternal(val):
 # Returns True when a TimeSeries is Null; otherwise returns False
 # Output: TimeSeries
 def IsNull(ts):
-    return TimeSeries(internal_ts_trim(internal_ts_map_unary_fcn(internal_is_null, try_converting_to_ts(ts).dict)))
+    return TimeSeries(internal_ts_map_unary_fcn(internal_is_null, try_converting_to_ts(ts).dict))
 
 
 # Internal, static version of the IsNull function
@@ -200,7 +204,7 @@ def internal_is_null(a_in: Value):
 # Returns True when a TimeSeries is Stub; otherwise returns False
 # Output: TimeSeries
 def IsStub(ts):
-    return TimeSeries(internal_ts_trim(internal_ts_map_unary_fcn(internal_is_stub, try_converting_to_ts(ts).dict)))
+    return TimeSeries(internal_ts_map_unary_fcn(internal_is_stub, try_converting_to_ts(ts).dict))
 
 
 # Internal, static version of the IsStub function
@@ -215,7 +219,7 @@ def internal_is_stub(a_in: Value):
 # Get the certainty factor (CF) of the values in the time line
 # Output: TimeSeries
 def GetCF(ts):
-    return TimeSeries(internal_ts_trim(internal_ts_map_unary_fcn(internal_get_cf, try_converting_to_ts(ts).dict)))
+    return TimeSeries(internal_ts_map_unary_fcn(internal_get_cf, try_converting_to_ts(ts).dict))
 
 
 # Internal, static version of the GetCF function
@@ -363,8 +367,16 @@ def _simple_add_years(d: str, n: int):
 
 
 # Time series version of math.ceil(x)
-# def Ceil(x):
-#     return process_unary(math.ceil, x)
+# Output: TimeSeries
+def Ceil(ts):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_math_ceil, try_converting_to_ts(ts).dict))
+
+
+# Internal, static version of the GetCF function
+# Output: Value
+def internal_math_ceil(a_in: Value):
+    return Value(try_converting_to_val(a_in).cf)
+
 
 
 # Time series version of math.floor(x)

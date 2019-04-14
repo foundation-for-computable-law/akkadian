@@ -107,7 +107,7 @@ def internal_ts_thread(ts1: dict, ts2: dict):
 # Output: dictionary
 def internal_ts_map_unary_fcn(f, ts: dict):
     vals = [f(x) for x in ts.values()]
-    return internal_compose_ts(ts.keys(), vals)
+    return internal_ts_trim(internal_compose_ts(ts.keys(), vals))
 
 
 # Map a binary function to the values of a time series dictionary

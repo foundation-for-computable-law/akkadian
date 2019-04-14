@@ -167,13 +167,13 @@ def other_credits(person):
 
 
 def personal_allowances_worksheet_line_h(person, spouse):
-    return claiming_self(person) 
-    + file_married_jointly(person, spouse) 
-    + file_head_of_household(person) 
-    + only_job_or_low_wage_second(person, spouse) 
-    + child_tax_credit(person, spouse) 
-    + credit_for_other_dependents(person, spouse) 
-    + other_credits(person)
+    return claiming_self(person)\
+           + file_married_jointly(person, spouse)\
+           + file_head_of_household(person)\
+           + only_job_or_low_wage_second(person, spouse)\
+           + child_tax_credit(person, spouse)\
+           + credit_for_other_dependents(person, spouse)\
+           + other_credits(person)
 
 
 #######Deductions, Adjustments, and Additional Income Worksheet#######
