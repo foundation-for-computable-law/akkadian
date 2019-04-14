@@ -16,7 +16,7 @@ def form_w4_complete(person, spouse):
 # can we make person/spouse global?
 def personal_allowances_wksheet_complete(person, spouse):
     # check complete if line h is known?
-    return personal_allowances_worksheet_line_h >= 0
+    return personal_allowances_worksheet_line_h(person, spouse) >= 0
 
 
 # A, default to true/1?
@@ -167,10 +167,13 @@ def other_credits(person):
 
 
 def personal_allowances_worksheet_line_h(person, spouse):
-    return(claiming_self(person) + file_married_jointly(person, spouse) + file_head_of_household(person)
-           + only_job_or_low_wage_second(person, spouse) + child_tax_credit(
-               person, spouse) + credit_for_other_dependents(person, spouse)
-           + other_credits(person))
+    return claiming_self(person) 
+    + file_married_jointly(person, spouse) 
+    + file_head_of_household(person) 
+    + only_job_or_low_wage_second(person, spouse) 
+    + child_tax_credit(person, spouse) 
+    + credit_for_other_dependents(person, spouse) 
+    + other_credits(person)
 
 
 #######Deductions, Adjustments, and Additional Income Worksheet#######
