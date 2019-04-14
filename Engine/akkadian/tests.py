@@ -857,6 +857,14 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Pretty(Not(tsbool2)),
                          Pretty(TS({Dawn: False, '2023-01-01': True, '2024-01-01': Stub})))
 
+    def test_ts_not_3(self):
+        self.assertEqual(Pretty(Not(Eternal(True))),
+                         Pretty(Eternal(False)))
+
+    def test_ts_not_4(self):
+        self.assertEqual(Pretty(Not(True)),
+                         Pretty(Eternal(False)))
+
     # Time series addition
 
     def test_ts_add_1(self):
@@ -1217,9 +1225,9 @@ class TestDSL(unittest.TestCase):
 
     # Simple mathematical functions
 
-    def test_math_1(self):
-        self.assertEqual(Pretty(GetCF(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5}))),
-                         Pretty(TS({Dawn: 1})))
+    # def test_math_1(self):
+    #     self.assertEqual(Pretty(Ceil(TS({Dawn: 3, '2003-04-02': Null, '2009-03-04': 5}))),
+    #                      Pretty(TS({Dawn: 1})))
 
 
 

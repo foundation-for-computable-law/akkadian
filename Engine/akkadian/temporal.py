@@ -13,7 +13,7 @@ from akkadian.Value import *
 # Time series NOT
 # Output: TimeSeries
 def Not(ts: TimeSeries):
-    return TimeSeries(internal_ts_map_unary_fcn(internal_not, ts.dict))
+    return TimeSeries(internal_ts_map_unary_fcn(internal_not, try_converting_to_ts(ts).dict))
 
 
 # Internal, static version of the logical NOT function
@@ -375,7 +375,10 @@ def Ceil(ts):
 # Internal, static version of the GetCF function
 # Output: Value
 def internal_math_ceil(a_in: Value):
-    return Value(try_converting_to_val(a_in).cf)
+    return 0
+    # a = try_converting_to_val(a_in)
+    # setattr(v, 'value', math.ceil(v.value))
+    # return Value(math.ceil(a.value), cf=)
 
 
 
