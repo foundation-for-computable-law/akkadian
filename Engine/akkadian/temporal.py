@@ -2,7 +2,7 @@ import functools
 import math
 from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
-from pandas import date_range
+# from pandas import date_range
 from akkadian.TimeSeries import *
 from akkadian.Value import *
 
@@ -150,6 +150,14 @@ def internal_if(cf, *args):
         return internal_if(min(cf, arg0.cf), *args[2:])
 
 
+# COMPOSE A TIME SERIES
+
+
+# Compose a time series from a list of dates and a list of values
+def ComposeTS(dates: list, values: list):
+    return TS(internal_compose_ts(dates, values))
+
+
 # CONSTRUCTING BOOLEAN TIME SERIES
 
 
@@ -172,6 +180,66 @@ def EffectiveBetween(start, end):
 # Creates a time series that has a given value forever
 def Eternal(val):
     return TimeSeries({1: try_converting_to_val(val)})
+
+
+# IDENTIFYING INDETERMINATE PERIODS
+
+
+# Returns True when a TimeSeries is Null; otherwise returns False
+# Output: TimeSeries
+def IsNull(ts):
+    return TimeSeries(internal_ts_trim(internal_ts_map_unary_fcn(internal_is_null, try_converting_to_ts(ts).dict)))
+
+
+# Internal, static version of the IsNull function
+# Output: Value
+def internal_is_null(a_in: Value):
+    return Value(try_converting_to_val(a_in).is_null)
+
+
+# Returns True when a TimeSeries is Stub; otherwise returns False
+# Output: TimeSeries
+def IsStub(ts):
+    return TimeSeries(internal_ts_trim(internal_ts_map_unary_fcn(internal_is_stub, try_converting_to_ts(ts).dict)))
+
+
+# Internal, static version of the IsStub function
+# Output: Value
+def internal_is_stub(a_in: Value):
+    return Value(try_converting_to_val(a_in).is_stub)
+
+
+# MANIPULATING CERTAINTY FACTORS
+
+
+# Get the certainty factor (CF) of the values in the time line
+# Output: TimeSeries
+def GetCF(ts):
+    return TimeSeries(internal_ts_trim(internal_ts_map_unary_fcn(internal_get_cf, try_converting_to_ts(ts).dict)))
+
+
+# Internal, static version of the GetCF function
+# Output: Value
+def internal_get_cf(a_in: Value):
+    return Value(try_converting_to_val(a_in).cf)
+
+
+# Set the CF on a time series (the CF can vary over time)
+# Output: TimeSeries
+def SetCF(ts, cf):
+    return process_binary_ts(_set_cf, ts, cf)
+
+
+# Internal, static version of SetCF
+# Output: Value
+def _set_cf(v: Value, cf: Value):
+    return Value(v.value, cf=max(min(cf.value, 1), 0))
+
+
+# Rescales the CF of a TimeSeries by a given factor
+# Output: TimeSeries
+def RescaleCF(ts, factor):
+    return SetCF(ts, GetCF(ts) * factor)
 
 
 # DATE ARITHMETIC
