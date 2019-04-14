@@ -75,7 +75,7 @@ class TimeSeries:
         return process_binary_ts(internal_eq, self, o)
 
     def __ne__(self, o):
-        return Not((self == o)) # TODO: Bug?
+        return process_binary_ts(internal_ne, self, o)
 
     def __gt__(self, o):
         return process_binary_ts(internal_gt, self, o)

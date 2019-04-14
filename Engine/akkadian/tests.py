@@ -931,6 +931,14 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Pretty(Eternal(3) >= 3),
                          Pretty(Eternal(True)))
 
+    def test_ts_cmp_5(self):
+        self.assertEqual(Pretty(TS({Dawn: 4, '2020-01-01': 8}) != 3),
+                         Pretty(TS({Dawn: True})))
+
+    def test_ts_cmp_6(self):
+        self.assertEqual(Pretty(TS({Dawn: 4, '2020-01-01': 8}) != 4),
+                         Pretty(TS({Dawn: False, '2020-01-01': True})))
+
     # AddDays
 
     def test_adddays_1(self):
