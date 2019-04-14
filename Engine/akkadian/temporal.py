@@ -497,7 +497,12 @@ def AsOf(ts, dt):
 # TODO...
 
 # def BalancingTest(*args):
-#     score = Total(Map(lambda x, y: Bool(x) * y, Partition(args, 2)))
+#     score = Total(Map(lambda x: Boole(x[0]) * x[1], args))
 #     limit = If(score < 0, x, y)
-#     return RescaleCF(Bool(score), score/limit)
+#     return RescaleCF(score > 0, score/limit)
 
+
+# Returns 1 if the input value is True; otherwise returns 0
+# Output: TimeSeries
+def Boole(ts):
+    return If(ts, 1, 0)
