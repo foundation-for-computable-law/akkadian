@@ -1052,129 +1052,151 @@ class TestDSL(unittest.TestCase):
                                        Value(False,.6), Value(1, .5),
                                        Value(True,.5), Value(1, .9)).cf, .5)
 
-    # # MAP
-    #
-    # def test_map_1(self):
-    #     self.assertEqual(Map(lambda x: x * 8, [3, 5, 8]).value, [24, 40, 64])
-    #
-    # def test_map_2(self):
-    #     self.assertEqual(Map(lambda x: x * 8, V([3, 5, 8])).value, [24, 40, 64])
-    #
-    # def test_map_3(self):
-    #     self.assertEqual(Map(lambda x: x * 8, V(None)).value, None)
-    #
-    # def test_map_4(self):
-    #     self.assertEqual(Map(lambda x: x * 8, Stub()).value, StubVal)
-    #
-    # def test_map_5(self):
-    #     self.assertEqual(Map(lambda x: x * 8, [3, V(None), 8]).value, None)
-    #
-    # def test_map_6(self):
-    #     self.assertEqual(Map(lambda x: x * 8, V([3, V(None), 8])).value, None)
-    #
-    # def test_map_7(self):
-    #     self.assertEqual(Map(lambda x: x * 8, Stub()).value, StubVal)
-    #
-    # # ANY
-    #
-    # def test_any_1(self):
-    #     self.assertEqual(Any([3, 5, 8]).value, False)
-    #
-    # def test_any_2(self):
-    #     self.assertEqual(Any(V([3, 5, 8])).value, False)
-    #
-    # def test_any_3(self):
-    #     self.assertEqual(Any(V([3, 5, True])).value, True)
-    #
-    # def test_any_4(self):
-    #     self.assertEqual(Any(V([3, 5, V(True)])).value, True)
-    #
-    # def test_any_5(self):
-    #     self.assertEqual(Any([3, 5, V(True)]).value, True)
-    #
-    # def test_any_6(self):
-    #     self.assertEqual(Any([3, 5, V(False)]).value, False)
-    #
-    # def test_any_7(self):
-    #     self.assertEqual(Any([3, 5, V(None)]).value, None)
-    #
-    # def test_any_8(self):
-    #     self.assertEqual(Any(V(None)).value, None)
-    #
-    # def test_any_9(self):
-    #     self.assertEqual(Any([3, 5, Stub()]).value, StubVal)
-    #
-    # def test_any_10(self):
-    #     self.assertEqual(Any(Stub()).value, StubVal)
-    #
-    # def test_any_11(self):
-    #     self.assertEqual(Any([3, True, Stub()]).value, True)
-    #
-    # def test_any_12(self):
-    #     self.assertEqual(Any([True, Stub()]).value, True)
-    #
-    # def test_any_13(self):
-    #     self.assertEqual(Any([V(True), Stub()]).value, True)
-    #
-    # def test_any_14(self):
-    #     self.assertEqual(Any([False, False, True]).value, True)
-    #
-    # # ALL
-    #
-    # def test_all_1(self):
-    #     self.assertEqual(All([3, 5, 8]).value, False)
-    #
-    # def test_all_2(self):
-    #     self.assertEqual(All(V([3, 5, 8])).value, False)
-    #
-    # def test_all_3(self):
-    #     self.assertEqual(All(V([3, 5, True])).value, False)
-    #
-    # def test_all_4(self):
-    #     self.assertEqual(All(V([3, 5, V(True)])).value, False)
-    #
-    # def test_all_5(self):
-    #     self.assertEqual(All([3, 5, V(True)]).value, False)
-    #
-    # def test_all_6(self):
-    #     self.assertEqual(All([3, 5, V(False)]).value, False)
-    #
-    # def test_all_7(self):
-    #     self.assertEqual(All([V(True), V(True), V(True)]).value, True)
-    #
-    # def test_all_8(self):
-    #     self.assertEqual(All([V(True), True, V(True)]).value, True)
-    #
-    # def test_all_9(self):
-    #     self.assertEqual(All([3, 5, Stub()]).value, StubVal)
-    #
-    # def test_all_10(self):
-    #     self.assertEqual(All(Stub()).value, StubVal)
-    #
-    # def test_all_11(self):
-    #     self.assertEqual(All([3, False, Stub()]).value, False)
-    #
-    # def test_all_12(self):
-    #     self.assertEqual(All([False, Stub()]).value, False)
-    #
-    # def test_all_13(self):
-    #     self.assertEqual(All([V(False), Stub()]).value, False)
-    #
-    # # EXISTS
-    #
-    # def test_exists_1(self):
-    #     self.assertEqual(Exists(lambda x: x > 6, V([3, 5, 8])).value, True)
-    #
-    # def test_exists_2(self):
-    #     self.assertEqual(Exists(lambda x: x > 16, V([3, 5, 8])).value, False)
-    #
-    # # FORALL
-    #
-    # def test_forall_1(self):
-    #     self.assertEqual(ForAll(lambda x: x > 6, V([3, 5, 8])).value, False)
-    #
-    # def test_forall_2(self):
-    #     self.assertEqual(ForAll(lambda x: x > 1, V([3, 5, 8])).value, True)
+    # internal_map
+
+    def test_internal_map_1(self):
+        self.assertEqual(internal_map(lambda x: x * 8, [3, 5, 8]).value, [24, 40, 64])
+
+    def test_internal_map_2(self):
+        self.assertEqual(internal_map(lambda x: x * 8, Value([3, 5, 8])).value, [24, 40, 64])
+
+    def test_internal_map_3(self):
+        self.assertEqual(internal_map(lambda x: x * 8, Null).value, "Null")
+
+    def test_internal_map_4(self):
+        self.assertEqual(internal_map(lambda x: x * 8, Stub).value, "Stub")
+
+    def test_internal_map_5(self):
+        self.assertEqual(internal_map(lambda x: x * 8, [3, Null, 8]).value, "Null")
+
+    def test_internal_map_6(self):
+        self.assertEqual(internal_map(lambda x: x * 8, Value([3, Null, 8])).value, "Null")
+
+    def test_internal_map_7(self):
+        self.assertEqual(internal_map(lambda x: x * 8, Stub).value, "Stub")
+
+    # MAP
+
+    def test_map_1(self):
+        self.assertEqual(Pretty(Map(lambda x: x * 8, [3, 5, 8])),
+                         Pretty(Eternal([24, 40, 64])))
+
+    # internal_any
+
+    def test_internal_any_1(self):
+        self.assertEqual(internal_any([3, 5, 8]).value, False)
+
+    def test_internal_any_2(self):
+        self.assertEqual(internal_any(Value([3, 5, 8])).value, False)
+
+    def test_internal_any_3(self):
+        self.assertEqual(internal_any(Value([3, 5, True])).value, True)
+
+    def test_internal_any_4(self):
+        self.assertEqual(internal_any(Value([3, 5, Value(True)])).value, True)
+
+    def test_internal_any_5(self):
+        self.assertEqual(internal_any([3, 5, Value(True)]).value, True)
+
+    def test_internal_any_6(self):
+        self.assertEqual(internal_any([3, 5, Value(False)]).value, False)
+
+    def test_internal_any_7(self):
+        self.assertEqual(internal_any([3, 5, Null]).value, "Null")
+
+    def test_internal_any_8(self):
+        self.assertEqual(internal_any(Null).value, "Null")
+
+    def test_internal_any_9(self):
+        self.assertEqual(internal_any([3, 5, Stub]).value, "Stub")
+
+    def test_internal_any_10(self):
+        self.assertEqual(internal_any(Stub).value, "Stub")
+
+    def test_internal_any_11(self):
+        self.assertEqual(internal_any([3, True, Stub]).value, True)
+
+    def test_internal_any_12(self):
+        self.assertEqual(internal_any([True, Stub]).value, True)
+
+    def test_internal_any_13(self):
+        self.assertEqual(internal_any([Value(True), Stub]).value, True)
+
+    def test_internal_any_14(self):
+        self.assertEqual(internal_any([False, False, True]).value, True)
+
+    # ANY
+
+    def test_any_1(self):
+        self.assertEqual(Pretty(Any(Eternal([True, False, False]))),
+                         Pretty(Eternal(True)))
+
+    # internal_all
+
+    def test_internal_all_1(self):
+        self.assertEqual(internal_all([3, 5, 8]).value, False)
+
+    def test_internal_all_2(self):
+        self.assertEqual(internal_all(Value([3, 5, 8])).value, False)
+
+    def test_internal_all_3(self):
+        self.assertEqual(internal_all(Value([3, 5, True])).value, False)
+
+    def test_internal_all_4(self):
+        self.assertEqual(internal_all(Value([3, 5, Value(True)])).value, False)
+
+    def test_internal_all_5(self):
+        self.assertEqual(internal_all([3, 5, Value(True)]).value, False)
+
+    def test_internal_all_6(self):
+        self.assertEqual(internal_all([3, 5, Value(False)]).value, False)
+
+    def test_internal_all_7(self):
+        self.assertEqual(internal_all([Value(True), Value(True), Value(True)]).value, True)
+
+    def test_internal_all_8(self):
+        self.assertEqual(internal_all([Value(True), True, Value(True)]).value, True)
+
+    def test_internal_all_9(self):
+        self.assertEqual(internal_all([3, 5, Stub]).value, "Stub")
+
+    def test_internal_all_10(self):
+        self.assertEqual(internal_all(Stub).value, "Stub")
+
+    def test_internal_all_11(self):
+        self.assertEqual(internal_all([3, False, Stub]).value, False)
+
+    def test_internal_all_12(self):
+        self.assertEqual(internal_all([False, Stub]).value, False)
+
+    def test_internal_all_13(self):
+        self.assertEqual(internal_all([Value(False), Stub]).value, False)
+
+    # ALL
+
+    def test_all_1(self):
+        self.assertEqual(Pretty(All(Eternal([True, False, False]))),
+                         Pretty(Eternal(False)))
+
+    def test_all_2(self):
+        self.assertEqual(Pretty(All(Eternal([True, True, True]))),
+                         Pretty(Eternal(True)))
+
+    # EXISTS
+
+    def test_exists_1(self):
+        self.assertEqual(Exists(lambda x: x > 6, Eternal([3, 5, 8])), True)
+
+    def test_exists_2(self):
+        self.assertEqual(Exists(lambda x: x > 16, Eternal([3, 5, 8])), False)
+
+    # FORALL
+
+    def test_forall_1(self):
+        self.assertEqual(ForAll(lambda x: x > 6, Eternal([3, 5, 8])), False)
+
+    def test_forall_2(self):
+        self.assertEqual(ForAll(lambda x: x > 1, Eternal([3, 5, 8])), True)
 
     # ComposeTS
 
