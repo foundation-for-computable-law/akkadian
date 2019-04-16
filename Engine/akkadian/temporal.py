@@ -125,7 +125,7 @@ def if_for_values(*args):
 
 def internal_if(cf, *args):
 
-    arg0 = try_converting_to_val(args[0])
+    arg0 = try_converting_to_val_even_ts(args[0])
 
     # "ELSE" - Return the default value
     if len(args) == 1:
@@ -152,6 +152,17 @@ def internal_if(cf, *args):
     # Compress the expression and recurse
     else:
         return internal_if(min(cf, arg0.cf), *args[2:])
+
+
+# If item is a Value object, return it; otherwise convert it to a Value object
+# Output: Value
+def try_converting_to_val_even_ts(a):
+    if isinstance(a, TimeSeries):
+        return a.dict[1]
+    elif isinstance(a, Value):
+        return a
+    else:
+        return Value(a)
 
 
 # COMPOSE A TIME SERIES

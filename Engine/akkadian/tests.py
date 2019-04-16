@@ -994,25 +994,25 @@ class TestDSL(unittest.TestCase):
 
     # if_for_values
 
-    def test_if_1(self):
+    def test_if_for_values_1(self):
         self.assertEqual(if_for_values(Null, 1, 2).value, "Null")
 
-    def test_if_2(self):
+    def test_if_for_values_2(self):
         self.assertEqual(if_for_values(Value(True), 1, 2).value, 1)
 
-    def test_if_3(self):
+    def test_if_for_values_3(self):
         self.assertEqual(if_for_values(True, 1, 2).value, 1)
 
-    def test_if_4(self):
+    def test_if_for_values_4(self):
         self.assertEqual(if_for_values(Value(False), 1, 2).value, 2)
 
-    def test_if_5(self):
+    def test_if_for_values_5(self):
         self.assertEqual(if_for_values(False, 1, 2).value, 2)
 
-    def test_if_6(self):
+    def test_if_for_values_6(self):
         self.assertEqual(if_for_values(Stub, 1, 2).value, "Stub")
 
-    def test_if_7(self):
+    def test_if_for_values_7(self):
         self.assertEqual(if_for_values(True, Stub, 2).value, "Stub")
 
     # if_for_values (CFs)
@@ -1051,6 +1051,32 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(if_for_values(Value(False,.8), Value(1, .9),
                                        Value(False,.6), Value(1, .5),
                                        Value(True,.5), Value(1, .9)).cf, .5)
+
+    # If
+
+    def test_if_1(self):
+        self.assertEqual(Pretty(If(Null, 1, 2)),
+                         Pretty(Eternal(Null)))
+
+    def test_if_2(self):
+        self.assertEqual(Pretty(If(True, 1, 2)),
+                         Pretty(Eternal(1)))
+
+    def test_if_3(self):
+        self.assertEqual(Pretty(If(False, 1, 2)),
+                         Pretty(Eternal(2)))
+
+    def test_if_4(self):
+        self.assertEqual(Pretty(If(Eternal(True), 1, 2)),
+                         Pretty(Eternal(1)))
+
+    def test_if_5(self):
+        self.assertEqual(Pretty(If(Eternal(False), 1, 2)),
+                         Pretty(Eternal(2)))
+
+    def test_if_6(self):
+        self.assertEqual(Pretty(If(Eternal(False), Eternal(1), Eternal(2))),
+                         Pretty(Eternal(2)))
 
     # internal_map
 
@@ -1306,6 +1332,40 @@ class TestDSL(unittest.TestCase):
     def test_date_decomp_3(self):
         self.assertEqual(Pretty(Day(TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))),
                          Pretty(Eternal(2)))
+
+    # internal_min
+
+    def test_internal_min_1(self):
+        self.assertEqual(internal_min([3, 5, 8]).value, 3)
+
+    def test_internal_min_2(self):
+        self.assertEqual(internal_min([13, 5, 8]).value, 5)
+
+    def test_internal_min_3(self):
+        self.assertEqual(internal_min([13, Stub, 8]).value, "Stub")
+
+    def test_internal_min_4(self):
+        self.assertEqual(internal_min([13, Stub, Null]).value, "Stub")
+
+    def test_internal_min_5(self):
+        self.assertEqual(internal_min([13, 6, Null]).value, "Null")
+
+    def test_internal_min_6(self):
+        self.assertEqual(internal_min(Null).value, "Null")
+
+    # Min
+
+    def test_min_1(self):
+        self.assertEqual(Pretty(Min([3, 5, 8])),
+                         Pretty(Eternal(3)))
+
+    def test_min_2(self):
+        self.assertEqual(Pretty(Min(Eternal([3, 5, 8]))),
+                         Pretty(Eternal(3)))
+
+    def test_min_3(self):
+        self.assertEqual(Pretty(Min(Stub)),
+                         Pretty(Eternal(Stub)))
 
 
 # Used to test time series logic

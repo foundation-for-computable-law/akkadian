@@ -79,10 +79,12 @@ def hourly_wage(p):
 # Investigate([(another_rule, "Neela")])
 
 
+# Assumes(['spouse_of', 1, 2], ['family_relationship', 1, 2, "Spouse"])
+
+
 # result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
 
-print(Pretty(
-
-DayDelta('2000-01-01', TS({Dawn: '2003-04-02', '2013-04-02': '2023-04-02'}))
-))
+print(
+    sum([4,6,7,8])
+)
 
