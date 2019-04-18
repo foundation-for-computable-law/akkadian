@@ -2,7 +2,7 @@ from akkadian.facts import *
 from akkadian.temporal import *
 
 
-# Generates an interactive interview to collect info to resolve a goal
+# Generates an interactive interview in a Python console to collect info to resolve a goal
 def Investigate(goals: list, fs=[]):
 
     # Call the "apply rules" interface
@@ -100,7 +100,7 @@ def goal_is_determined(goal: TimeSeries):
 
 
 # Gets the value for a fact
-def In(typ: str, name: str, subj, obj, question=None):
+def In(typ: str, name: str, subj, obj, question=None, options=None):
 
     # See if the desired fact is in the "facts" data structure
     lookup = list(filter(lambda x: x.name == name and x.subject == subj and x.object == obj, facts))
@@ -110,7 +110,7 @@ def In(typ: str, name: str, subj, obj, question=None):
 
         # Prevent duplicates from being added
         if list(filter(lambda x: x[1] == name and x[2] == subj and x[3] == obj, missing_info)) == []:
-            missing_info.append([typ, name, subj, obj, text_subst(subj, obj, question)])
+            missing_info.append([typ, name, subj, obj, text_subst(subj, obj, question), options])
 
         # Indicate lack of knowledge
         return Eternal(Null)

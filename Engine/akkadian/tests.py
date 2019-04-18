@@ -25,6 +25,11 @@ class TestDSL(unittest.TestCase):
     def test_internal_asof_6(self):
         self.assertEqual(internal_asof(1400, {1: "a", 234: "b", 1351: "c"}), "c")
 
+    # AsOf
+
+    # def test_asof_1(self):
+    #     self.assertEqual(AsOf(TS({Dawn: "a", '2002-02-02': "c"}), Now), "c")
+
     # Date conversions
 
     def test_date_conversions_1(self):
@@ -1366,6 +1371,20 @@ class TestDSL(unittest.TestCase):
     def test_min_3(self):
         self.assertEqual(Pretty(Min(Stub)),
                          Pretty(Eternal(Stub)))
+
+    # ToScalar
+
+    def test_to_scalar_1(self):
+        self.assertEqual(ToScalar(Eternal("a")), "a")
+
+    def test_to_scalar_2(self):
+        self.assertEqual(ToScalar("a"), "a")
+
+    def test_to_scalar_3(self):
+        self.assertEqual(ToScalar(TS({Dawn: 32, '2011-01-01': 44})), 32)
+
+    def test_to_scalar_4(self):
+        self.assertEqual(ToScalar(TS({Dawn: 32, ToScalar(Now): 44})), 32)
 
 
 # Used to test time series logic

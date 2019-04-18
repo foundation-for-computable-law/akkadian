@@ -84,7 +84,36 @@ def hourly_wage(p):
 
 # result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
 
-print(
-    sum([4,6,7,8])
-)
+# print(Pretty(
+#     TS({Dawn: 32, ToScalar(Now): 44})
+# ))
 
+# Get the value of a time series on a given day
+# Output: Value
+# def internal_asof(dt: int, ts: dict):
+#     last = 0
+#     for key, value in ts.items():
+#         if dt >= last and dt < key:
+#             return ts[last]
+#         else:
+#             last = key
+#     return ts[list(ts)[-1]]
+
+
+
+
+def _asof_values(x: Value, y: Value):
+    return process_binary_val(f, x, y)
+
+def f(a, b):
+    return [a,b]
+
+
+ts = TS({Dawn: "a", '2002-02-02': "c"})
+dt = Now
+
+print(Pretty(
+    process_binary_ts(_asof_values, ts, dt)
+))
+
+print(ToScalar(process_binary_ts(_asof_values, ts, dt)))
