@@ -179,6 +179,15 @@ def try_converting_to_ts(a):
         return TimeSeries(Value(a))
 
 
+# LISTS OF TIME SERIES AND TIME SERIES OF LISTS
+
+# When a list containing a TimeSeries is encountered, it has to be converted into a TimeSeries of lists.
+# In a TimeSeries, every value in a date-value pair is a Value object.
+# For Value objects that contain lists, each item in the list can also be a Value object.
+# This is necessary because lists can contain Nulls and Stubs
+# The functions below handle these transformations and bookkeeping
+
+
 # Transform a list of TimeSeries into a TimeSeries of lists
 # Output: TimeSeries
 def normalize_list_of_ts(a):
@@ -202,7 +211,7 @@ def list_contains_ts_or_val(a: list):
 # Merge an arbitrary number of internal time series together
 def internal_ts_thread_multi(dicts: list):
     keys = get_unique_keys(dicts)
-    return {y: Value([internal_asof(y, x).value for x in dicts]) for y in keys}
+    return {y: Value([internal_asof(y, x) for x in dicts]) for y in keys}
 
 
 # Given a list of dictionaries, return a list of their unique keys
@@ -218,7 +227,17 @@ def get_unique_keys(dicts: list):
 # Converts string dates to ordinal dates, and scalars to Value objects
 # Output: TimeSeries
 def TS(dct: dict):
-    return TimeSeries(internal_ts_trim({str_date_to_ordinal(x[0]): try_converting_to_val(x[1]) for x in dct.items()}))
+    return TimeSeries(internal_ts_trim(
+        {str_date_to_ordinal(x[0]): try_converting_to_val(x[1]) for x in dct.items()}
+    ))
+
+
+# OTHER CONVERSIONS
+
+
+# Force a TimeSeries to be converted to a scalar by taking the value of the series at t=1
+def ToScalar(ts):
+    return try_converting_to_ts(ts).dict[1].value
 
 
 # DISPLAYING TIME SERIES

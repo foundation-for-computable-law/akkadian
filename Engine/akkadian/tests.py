@@ -1376,9 +1376,9 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Pretty(Min([3, Eternal(5), 8])),
                          Pretty(Eternal(3)))
 
-    # def test_min_5(self):
-    #     self.assertEqual(Pretty(Min([Stub, Eternal(5), 8])),
-    #                      Pretty(Eternal(Stub)))
+    def test_min_5(self):
+        self.assertEqual(Pretty(Min([Stub, Eternal(5), 8])),
+                         Pretty(Eternal(Stub)))
 
     # normalize_list_of_ts
 

@@ -85,7 +85,6 @@ def ForAll(f, a):
 # Output: TimeSeries
 def Min(tss: list):
     return TimeSeries(internal_ts_map_unary_fcn(internal_min, normalize_list_of_ts(tss).dict))
-    # return TimeSeries(internal_ts_map_unary_fcn(internal_min, try_converting_to_ts(ts).dict))
 
 
 # Internal, static version of the Min function
@@ -96,8 +95,8 @@ def internal_min(a_in):
 
 # Returns the maximum of the values in a list
 # Output: TimeSeries
-def Max(ts):
-    return TimeSeries(internal_ts_map_unary_fcn(internal_max, try_converting_to_ts(ts).dict))
+def Max(tss: list):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_max, normalize_list_of_ts(tss).dict))
 
 
 # Internal, static version of the Max function
@@ -108,9 +107,8 @@ def internal_max(a_in):
 
 # Returns the length of a list
 # Output: TimeSeries
-def Len(ts):
-    return TimeSeries(internal_ts_map_unary_fcn(internal_len, try_converting_to_ts(ts).dict))
-
+def Len(tss: list):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_len, normalize_list_of_ts(tss).dict))
 
 # Internal, static version of the Len function
 # Output: Value
@@ -120,8 +118,8 @@ def internal_len(a_in):
 
 # Returns the sum of a list of numbers
 # Output: TimeSeries
-def Sum(ts):
-    return TimeSeries(internal_ts_map_unary_fcn(internal_sum, try_converting_to_ts(ts).dict))
+def Sum(tss: list):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_sum, normalize_list_of_ts(tss).dict))
 
 
 # Internal, static version of the Sum function
@@ -142,7 +140,7 @@ def internal_list_fcn(f, a_in):
     elif list_contains_null(a.value):
         return Null
     else:
-        return Value(f(a.value))
+        return Value(f([try_converting_to_val(x).value for x in a.value]))
 
 
 # SUPPORTING FUNCTIONS

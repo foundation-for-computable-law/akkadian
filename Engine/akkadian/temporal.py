@@ -522,7 +522,3 @@ def AsOf(ts, dt):
 # Output: TimeSeries
 def Boole(ts):
     return If(ts, 1, 0)
-
-
-def ToScalar(ts):
-    return try_converting_to_ts(ts).dict[1].value

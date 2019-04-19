@@ -28,7 +28,7 @@ class Value:
 def pretty_list(a: Value):
     s = '['
     for x in a.value:
-        s += str(x) + ", "
+        s += str(try_converting_to_val(x).value) + ", "
     return s[:-2] + ']' + " (" + str(round(a.cf * 100)) + "% certain)"
 
 
