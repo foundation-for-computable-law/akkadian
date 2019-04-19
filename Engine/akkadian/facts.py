@@ -17,3 +17,12 @@ class Fact:
         self.subject = subject
         self.object = object
         self.value = value
+
+    # Converts the fact to a dictionary object
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "subject": self.subject,
+            "object": self.object,
+            "value": self.value
+        }

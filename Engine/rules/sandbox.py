@@ -84,36 +84,42 @@ def hourly_wage(p):
 
 # result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
 
-# print(Pretty(
-#     TS({Dawn: 32, ToScalar(Now): 44})
-# ))
+# result = normalize_list_of_ts([3, 5, 8])
 
-# Get the value of a time series on a given day
-# Output: Value
-# def internal_asof(dt: int, ts: dict):
-#     last = 0
-#     for key, value in ts.items():
-#         if dt >= last and dt < key:
-#             return ts[last]
-#         else:
-#             last = key
-#     return ts[list(ts)[-1]]
+# result = normalize_list_of_ts([3, Eternal(5), 8])
+#
+# result = normalize_list_of_ts([3, EffectiveFrom(ToScalar(Now)), 8])
 
+# print(try_converting_to_ts(5).dict[1].value)
 
-
-
-def _asof_values(x: Value, y: Value):
-    return process_binary_val(f, x, y)
-
-def f(a, b):
-    return [a,b]
-
-
-ts = TS({Dawn: "a", '2002-02-02': "c"})
-dt = Now
-
+# result = Min([3, 5, 8])
+#
 print(Pretty(
-    process_binary_ts(_asof_values, ts, dt)
+    normalize_list_of_ts([Stub, Eternal(4), TS({Dawn: 44, '2020-02-02': 234})])
 ))
 
-print(ToScalar(process_binary_ts(_asof_values, ts, dt)))
+# print(Pretty(Eternal([3, 4, 5])))
+
+# normalize_list_of_ts([3, Eternal(4), 5])
+#
+# print(isinstance(Eternal(3), TimeSeries))
+#
+# print(list_contains_ts([1, 3]))
+#
+# print(list_contains_ts([1, Eternal(3)]))
+
+# def _asof_values(x: Value, y: Value):
+#     return process_binary_val(f, x, y)
+#
+# def f(a, b):
+#     return [a,b]
+#
+#
+# ts = TS({Dawn: "a", '2002-02-02': "c"})
+# dt = Now
+#
+# print(Pretty(
+#     process_binary_ts(_asof_values, ts, dt)
+# ))
+#
+# print(ToScalar(process_binary_ts(_asof_values, ts, dt)))

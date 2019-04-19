@@ -1372,6 +1372,24 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(Pretty(Min(Stub)),
                          Pretty(Eternal(Stub)))
 
+    def test_min_4(self):
+        self.assertEqual(Pretty(Min([3, Eternal(5), 8])),
+                         Pretty(Eternal(3)))
+
+    # def test_min_5(self):
+    #     self.assertEqual(Pretty(Min([Stub, Eternal(5), 8])),
+    #                      Pretty(Eternal(Stub)))
+
+    # normalize_list_of_ts
+
+    def test_normalize_list_of_ts_1(self):
+        self.assertEqual(Pretty(normalize_list_of_ts([3, 4])),
+                         Pretty(Eternal([3, 4])))
+
+    def test_normalize_list_of_ts_2(self):
+        self.assertEqual(Pretty(normalize_list_of_ts([3, Eternal(4), 5])),
+                         Pretty(Eternal([3, 4, 5])))
+
     # ToScalar
 
     def test_to_scalar_1(self):

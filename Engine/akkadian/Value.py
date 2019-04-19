@@ -23,7 +23,17 @@ class Value:
         return str(self.value) + " (" + str(round(self.cf * 100)) + "% certain)"
 
 
+# Displays a Value object that contains a list
+# Output: string
+def pretty_list(a: Value):
+    s = '['
+    for x in a.value:
+        s += str(x) + ", "
+    return s[:-2] + ']' + " (" + str(round(a.cf * 100)) + "% certain)"
+
+
 # Indicates whether two Values are equivalent for purposes of trimming a TimeSeries
+# Output: Boolean
 def values_are_equivalent(v1: Value, v2: Value):
     return v1.cf == v2.cf and \
            ((v1.is_stub and v2.is_stub) or (v1.is_null and v2.is_null) or (v1.value == v2.value))

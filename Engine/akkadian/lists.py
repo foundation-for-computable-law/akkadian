@@ -83,8 +83,9 @@ def ForAll(f, a):
 
 # Returns the minimum of the values in a list
 # Output: TimeSeries
-def Min(ts):
-    return TimeSeries(internal_ts_map_unary_fcn(internal_min, try_converting_to_ts(ts).dict))
+def Min(tss: list):
+    return TimeSeries(internal_ts_map_unary_fcn(internal_min, normalize_list_of_ts(tss).dict))
+    # return TimeSeries(internal_ts_map_unary_fcn(internal_min, try_converting_to_ts(ts).dict))
 
 
 # Internal, static version of the Min function
