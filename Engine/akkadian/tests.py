@@ -27,8 +27,52 @@ class TestDSL(unittest.TestCase):
 
     # AsOf
 
-    # def test_asof_1(self):
-    #     self.assertEqual(AsOf(TS({Dawn: "a", '2002-02-02': "c"}), Now), "c")
+    def test_asof_1(self):
+        self.assertEqual(AsOf(Now, TS({Dawn: "a", '2002-02-02': "c"})), "c")
+
+    def test_asof_2(self):
+        self.assertEqual(Pretty(AsOf(TS({Dawn: Dawn, '2002-02-02': '2010-02-02'}), TS({Dawn: "a", '2002-02-02': "c"}))),
+                         Pretty(TS({Dawn: "a", '2002-02-02': "c"})))
+
+    def test_asof_3(self):
+        self.assertEqual(Pretty(AsOf(TS({Dawn: Stub, '2002-02-02': '2010-02-02'}), TS({Dawn: "a", '2002-02-02': "c"}))),
+                         Pretty(TS({Dawn: Stub, '2002-02-02': "c"})))
+
+    def test_asof_4(self):
+        self.assertEqual(Pretty(AsOf(TS({Dawn: Null, '2002-02-02': '2010-02-02'}), TS({Dawn: "a", '2002-02-02': "c"}))),
+                         Pretty(TS({Dawn: Null, '2002-02-02': "c"})))
+
+    def test_asof_5(self):
+        self.assertEqual(Pretty(AsOf(TS({Dawn: Null, '2002-02-02': Stub}), TS({Dawn: "a", '2002-02-02': "c"}))),
+                         Pretty(TS({Dawn: Null, '2002-02-02': Stub})))
+
+    def test_asof_6(self):
+        self.assertEqual(Pretty(AsOf(TS({Dawn: Null, '2002-02-02': Null}), TS({Dawn: "a", '2002-02-02': "c"}))),
+                         Pretty(TS({Dawn: Null})))
+
+    def test_asof_7(self):
+        self.assertEqual(Pretty(AsOf(TS({Dawn: Null, '2002-02-02': Null}), TS({Dawn: "a", '2002-02-02': "c"}))),
+                         Pretty(Eternal(Null)))
+
+    def test_asof_8(self):
+        self.assertEqual(Pretty(AsOf(Null, TS({Dawn: "a", '2002-02-02': "c"}))),
+                         Pretty(Eternal(Null)))
+
+    def test_asof_9(self):
+        self.assertEqual(Pretty(AsOf(Now, TS({Dawn: "a", '2002-02-02': Stub}))),
+                         Pretty(Eternal(Stub)))
+
+    def test_asof_10(self):
+        self.assertEqual(Pretty(AsOf(Now, Stub)),
+                         Pretty(Eternal(Stub)))
+
+    def test_asof_11(self):
+        self.assertEqual(Pretty(AsOf(Null, Stub)),
+                         Pretty(Eternal(Stub)))
+
+    def test_asof_12(self):
+        self.assertEqual(Pretty(AsOf(Stub, Null)),
+                         Pretty(Eternal(Stub)))
 
     # Date conversions
 
@@ -1402,7 +1446,7 @@ class TestDSL(unittest.TestCase):
         self.assertEqual(ToScalar(TS({Dawn: 32, '2011-01-01': 44})), 32)
 
     def test_to_scalar_4(self):
-        self.assertEqual(ToScalar(TS({Dawn: 32, ToScalar(Now): 44})), 32)
+        self.assertEqual(ToScalar(TS({Dawn: 32, Now: 44})), 32)
 
 
 # Used to test time series logic

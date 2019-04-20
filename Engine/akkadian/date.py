@@ -8,4 +8,4 @@ def Date(y: int, m: int, d: int):
 
 
 # Returns the current date
-Now = Eternal(date.today().isoformat())
+Now = date.today().isoformat()

@@ -5,6 +5,9 @@ from akkadian.Value import *
 # TODO: Refactor and simplify these functions
 
 
+# LIST FUNCTIONS
+
+
 # Map a function over a list
 # Output: TimeSeries
 # TODO: Implement CFs
@@ -128,6 +131,25 @@ def internal_sum(a_in):
     return internal_list_fcn(sum, a_in)
 
 
+# SET FUNCTIONS
+
+
+# Returns the intersection of two lists
+# Output: TimeSeries
+# def Intersection(tss1: list, tss2: list):
+#     return TimeSeries(internal_ts_map_unary_fcn(internal_sum, normalize_list_of_ts(tss).dict))
+
+# Union
+# IsIn
+# NotIn
+# IsSubsetOf
+# Difference / Delete?
+
+
+
+# SUPPORTING FUNCTIONS
+
+
 # Applies a list function to a Value object that is assumed to contain a list
 # Output: Value
 def internal_list_fcn(f, a_in):
@@ -141,9 +163,6 @@ def internal_list_fcn(f, a_in):
         return Null
     else:
         return Value(f([try_converting_to_val(x).value for x in a.value]))
-
-
-# SUPPORTING FUNCTIONS
 
 
 # Does a list contain Null?

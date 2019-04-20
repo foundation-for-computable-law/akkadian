@@ -489,15 +489,23 @@ E = math.e
 
 # EXTRACTING VALUES FROM A TIME SERIES
 
-
 # Value of a time series on a given date
 # Output: TimeSeries
-# TODO: Handle uncertainty
-def AsOf(ts, dt):
-    return None
-    # return process_binary_ts(f, ts, dt)
+def AsOf(dt, ts):
+    dt_dict = try_converting_to_ts(dt).dict
+    vals = [internal_asof_val(x, try_converting_to_ts(ts).dict) for x in dt_dict.values()]
+    return TimeSeries(internal_ts_trim(internal_compose_ts(dt_dict.keys(), vals)))
 
-# internal_asof(dt: int, ts: dict)
+
+# Internal version of the AsOf function
+# Output: Value
+def internal_asof_val(dt: Value, ts: dict):
+    if ts[1].is_stub:
+        return ts[1]
+    if dt.is_stub or dt.is_null:
+        return dt
+    else:
+        return internal_asof(str_date_to_ordinal(dt.value), ts)
 
 
 # TIME SERIES COMPONENTS
