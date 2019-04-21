@@ -82,13 +82,3 @@ def hourly_wage(p):
 # Assumes(['spouse_of', 1, 2], ['family_relationship', 1, 2, "Spouse"])
 
 # result = DateRange(start='2020-01-01', end='2022-01-01', periods=5)
-
-
-
-result = AsOf(Now, TS({Dawn: "a", '2002-02-02': "c"}))
-
-result = AsOf(TS({Dawn: Dawn, '2002-02-02': '2010-02-02'}), TS({Dawn: "a", '2002-02-02': "c"}))
-
-print(Pretty(
-    result
-))

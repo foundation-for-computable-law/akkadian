@@ -183,15 +183,15 @@ def try_converting_to_ts(a):
 
 # When a list containing a TimeSeries is encountered, it has to be converted into a TimeSeries of lists.
 # In a TimeSeries, every value in a date-value pair is a Value object.
-# For Value objects that contain lists, each item in the list can also be a Value object.
-# This is necessary because lists can contain Nulls and Stubs
-# The functions below handle these transformations and bookkeeping
+# For Value objects that contain lists, each item in the list is also a Value object.
+# This is necessary because lists can contain Nulls and Stubs.
+# The functions below handle these transformations and bookkeeping:
 
 
 # Transform a list of TimeSeries into a TimeSeries of lists
 # Output: TimeSeries
 def normalize_list_of_ts(a):
-    if isinstance(a, list) and list_contains_ts_or_val(a):
+    if isinstance(a, list):
         # Convert list of TimeSeries to a TimeSeries of lists
         dicts = [try_converting_to_ts(x).dict for x in a]
         return TimeSeries(internal_ts_thread_multi(dicts))
@@ -199,19 +199,10 @@ def normalize_list_of_ts(a):
         return try_converting_to_ts(a)
 
 
-# Indicates whether a list contains a TimeSeries object
-# Output: Boolean
-def list_contains_ts_or_val(a: list):
-    for x in a:
-        if isinstance(x, TimeSeries) or isinstance(x, Value):
-            return True
-    return False
-
-
 # Merge an arbitrary number of internal time series together
 def internal_ts_thread_multi(dicts: list):
     keys = get_unique_keys(dicts)
-    return {y: Value([internal_asof(y, x) for x in dicts]) for y in keys}
+    return {y: try_converting_to_val([internal_asof(y, x) for x in dicts]) for y in keys}
 
 
 # Given a list of dictionaries, return a list of their unique keys

@@ -20,7 +20,10 @@ class Value:
         self.is_null = null
 
     def pretty(self):
-        return str(self.value) + " (" + str(round(self.cf * 100)) + "% certain)"
+        if isinstance(self.value, list):
+            return pretty_list(self)
+        else:
+            return str(self.value) + " (" + str(round(self.cf * 100)) + "% certain)"
 
 
 # Displays a Value object that contains a list
@@ -46,6 +49,14 @@ def try_converting_to_val(a):
         return a
     else:
         return Value(a)
+
+
+# If item is a value object, return the value; otherwise return the input
+def try_getting_value(a):
+    if isinstance(a, Value):
+        return a.value
+    else:
+        return a
 
 
 # Value used to represent null (no value)
