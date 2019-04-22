@@ -53,9 +53,9 @@ def internal_and(a_in: Value, b_in: Value):
     elif a.value is True and b.value is True:
         return Value(True, cf=min(a.cf, b.cf))
     elif a.value is True:
-        return Value(b.value, cf=b.cf)
+        return b
     elif b.value is True:
-        return Value(a.value, cf=a.cf)
+        return a
     elif a.is_null and b.is_null:
         return Value("Null", cf=max(a.cf, b.cf), null=True)
     elif a.is_null:
@@ -92,9 +92,9 @@ def internal_or(a_in: Value, b_in: Value):
     elif a.value is False and b.value is False:
         return Value(False, cf=min(a.cf, b.cf))
     elif a.value is False:
-        return Value(b.value, cf=b.cf)
+        return b
     elif b.value is False:
-        return Value(a.value, cf=a.cf)
+        return a
     elif a.is_null and b.is_null:
         return Value("Null", cf=max(a.cf, b.cf), null=True)
     elif a.is_null:
@@ -115,21 +115,24 @@ def internal_or(a_in: Value, b_in: Value):
 # and also of the CF of the return value
 # TODO: Time series
 # TODO: Implement lazy evaluation so args are only invoked as needed
+# Output: TimeSeries
 def If(*args):
-    return Eternal(internal_if(1, *args))
+    return Eternal(if_for_values(*args))
 
 
+# Output: Value
 def if_for_values(*args):
     return internal_if(1, *args)
 
 
+# Output: Value
 def internal_if(cf, *args):
 
     arg0 = try_converting_to_val_even_ts(args[0])
 
     # "ELSE" - Return the default value
     if len(args) == 1:
-        return Value(arg0.value, cf=min(cf, arg0.cf))
+        return Value(arg0.value, cf=min(cf, arg0.cf), stub=arg0.is_stub, null=arg0.is_null)
 
     # "IF" - If the test evaluates to True
 
@@ -137,7 +140,7 @@ def internal_if(cf, *args):
     if arg0.is_stub:
         return arg0
     elif arg0.is_null:
-        arg1 = try_converting_to_val(args[1])
+        arg1 = try_converting_to_val_even_ts(args[1])
         if arg1.is_stub:
             return arg1
         else:
@@ -146,8 +149,8 @@ def internal_if(cf, *args):
     # Does test evaluate to True?
     if arg0.value:
         # "THEN"
-        arg1 = try_converting_to_val(args[1])
-        return Value(arg1.value, cf=min(cf, arg0.cf, arg1.cf))
+        arg1 = try_converting_to_val_even_ts(args[1])
+        return Value(arg1.value, cf=min(cf, arg0.cf, arg1.cf), stub=arg1.is_stub, null=arg1.is_null)
 
     # Compress the expression and recurse
     else:
@@ -248,7 +251,7 @@ def SetCF(ts, cf):
 # Internal, static version of SetCF
 # Output: Value
 def _set_cf(v: Value, cf: Value):
-    return Value(v.value, cf=max(min(cf.value, 1), 0))
+    return Value(v.value, cf=max(min(cf.value, 1), 0), stub=v.is_stub, null=v.is_null)
 
 
 # Rescales the CF of a TimeSeries by a given factor
