@@ -28,7 +28,7 @@ class TestDSL(unittest.TestCase):
     # AsOf
 
     def test_asof_1(self):
-        self.assertEqual(AsOf(Now, TS({Dawn: "a", '2002-02-02': "c"})), "c")
+        self.assertEqual(ToScalar(AsOf(Now, TS({Dawn: "a", '2002-02-02': "c"}))), "c")
 
     def test_asof_2(self):
         self.assertEqual(Pretty(AsOf(TS({Dawn: Dawn, '2002-02-02': '2010-02-02'}), TS({Dawn: "a", '2002-02-02': "c"}))),
@@ -73,6 +73,9 @@ class TestDSL(unittest.TestCase):
     def test_asof_12(self):
         self.assertEqual(Pretty(AsOf(Stub, Null)),
                          Pretty(Eternal(Stub)))
+
+    def test_asof_13(self):
+        self.assertEqual(ToScalar(AsOf('2010-01-01', TS({Dawn: Stub, '2002-02-02': "c"}))), "c")
 
     # Date conversions
 

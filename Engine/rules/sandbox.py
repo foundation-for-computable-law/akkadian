@@ -6,14 +6,17 @@ from akkadian import *
 # Substantive rules
 
 
+@explain
 def is_qualifying_relative(a, b):
     return And(age(a) < 18,
                age(b) >= 18,
                gender(b) == 'Female',
+               another_rule(a),
                Not(relationship(a, b) == "Child"),
                assessment_date() > '2001-01-01')
 
 
+@explain
 def another_rule(p):
     return Or(expedited_app(p),
               hourly_wage(p) < fed_min_wage(),
@@ -24,6 +27,7 @@ def another_rule(p):
 
 # Federal minimum wage for all covered, nonexempt workers
 # Source: https://www.dol.gov/whd/minwage/chart.htm
+@explain
 def fed_min_wage():
     return TS({Dawn: Stub,
                '1997-09-01': 5.15,
@@ -76,6 +80,7 @@ def hourly_wage(p):
 # Initiate an interactive interview
 # Investigate([(is_qualifying_relative, "Jim", "Lucy")],[Fact("assessment_date", None, None, '2020-02-02')])
 # Investigate([(is_qualifying_relative, "Jim", "Lucy")])
+
 # Investigate([(another_rule, "Neela")])
 
 

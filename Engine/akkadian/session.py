@@ -1,16 +1,24 @@
+from akkadian.date import *
 from akkadian.facts import *
 from akkadian.temporal import *
 
 
+# INVESTIGATE
+
+
 # Generates an interactive interview in a Python console to collect info to resolve a goal
 def Investigate(goals: list, fs=[]):
+
+    traversal_list.clear()
 
     # Call the "apply rules" interface
     re = ApplyRules(goals, fs)
 
     # If all of the goals have been determined, present the results
     if re["complete"]:
-        print(re["msg"])  # TODO
+        # print(re["msg"])
+        print("\n")
+        print(proof_tree_str(traversal_list))
 
     # Otherwise, ask the next question...
     else:
@@ -45,6 +53,9 @@ def convert_input(typ: str, val: str):
             return False
     else:
         return val
+
+
+# APPLY_RULES
 
 
 # Applies substantive rules to a fact pattern
@@ -99,6 +110,9 @@ def goal_is_determined(goal: TimeSeries):
     return not any([x.value == "Null" for x in goal.dict.values()])
 
 
+# IN
+
+
 # Gets the value for a fact
 def In(typ: str, name: str, subj, obj, question=None, options=None, help=None):
 
@@ -117,7 +131,16 @@ def In(typ: str, name: str, subj, obj, question=None, options=None, help=None):
 
     # If the fact is known, return its value
     else:
-        return Eternal(lookup[0].value)
+        result = Eternal(lookup[0].value)
+        if subj is None and obj is None:
+            f = name + "()"
+        elif obj is None:
+            f = name + "(" + subj + ")"
+        else:
+            f = name + "(" + subj + ", " + obj + ")"
+        traversal_list.append([1, f])
+        traversal_list.append([-1, f, result])
+        return result
 
 
 # Substitute the subject ({0}) and object ({1}) of a fact into the question text
@@ -136,3 +159,69 @@ def process_results(result: TimeSeries):
         "msg": Pretty(result),
         "complete": result is not Null
     }
+
+
+# PROOF TREES
+
+
+# Holds the node traversal list
+traversal_list = []
+
+
+# Given a tuple containing (name, *args), create a string e.g. "f(jim)"
+def fcn_tuple_to_str(tup):
+    return str(tup[0]) + str(tup[1:]).replace(",)", ")").replace("'", "")
+
+
+# A decorator that builds a data structure of the traversal of the function graph during rule execution
+def explain(func):
+    def wrapper(*args):
+        f = fcn_tuple_to_str((func.__name__, *args))
+        traversal_list.append([1, f])
+        result = func(*args)
+        traversal_list.append([-1, f, result])
+        return result
+    return wrapper
+
+
+# Given a function name and the list of traversed nodes, this function looks up the value of the named function
+def get_fcn_value_from_traversal_list(f_name, t_list):
+    for i in t_list:
+        if i[0] == -1 and i[1] == f_name:
+            return i[2]
+
+
+# Generates a proof tree, or explanation for a conclusion, from a list of the functions traversed during
+# rule execution
+def proof_tree_str(traverse_list):
+    result = ""
+    lev = -1
+    for i in traverse_list:
+        # Increment/decrement indentation level based on traversal data
+        lev += i[0]
+        if i[0] == 1:
+            # Indicate level by indentation
+            spc = " " * lev * 2
+            val = get_fcn_value_from_traversal_list(i[1], traverse_list)
+            # Print the function name and its value, with the appropriate indentation
+            result += spc + i[1] + " = " + str(ToScalar(AsOf(Now, val))) + "\n"
+    return result
+
+
+# def proof_tree_data(traverse_list):
+#     result = []
+#     lev = -1
+#
+#     for i in traverse_list:
+#
+#         # Increment/decrement indentation level based on traversal data
+#         lev += i[0]
+#         if i[0] == 1:
+#             # Indicate level by indentation
+#             spc = " " * lev * 2
+#             val = get_fcn_value_from_traversal_list(i[1], traverse_list)
+#
+#             # Print the function name and its value, with the appropriate indentation
+#             result.append(spc + i[1] + " = " + str(ToScalar(AsOf(Now, val))))
+#
+#     return result

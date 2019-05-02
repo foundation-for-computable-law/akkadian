@@ -503,7 +503,7 @@ def AsOf(dt, ts):
 # Internal version of the AsOf function
 # Output: Value
 def internal_asof_val(dt: Value, ts: dict):
-    if ts[1].is_stub:
+    if len(ts) == 1 and ts[1].is_stub:
         return ts[1]
     if dt.is_stub or dt.is_null:
         return dt
