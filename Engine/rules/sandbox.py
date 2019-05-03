@@ -79,8 +79,7 @@ def hourly_wage(p):
 
 # Initiate an interactive interview
 # Investigate([(is_qualifying_relative, "Jim", "Lucy")],[Fact("assessment_date", None, None, '2020-02-02')])
-# Investigate([(is_qualifying_relative, "Jim", "Lucy")])
-
+Investigate([(is_qualifying_relative, "Jim", "Lucy")])
 # Investigate([(another_rule, "Neela")])
 
 

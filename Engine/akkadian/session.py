@@ -191,37 +191,77 @@ def get_fcn_value_from_traversal_list(f_name, t_list):
             return i[2]
 
 
-# Generates a proof tree, or explanation for a conclusion, from a list of the functions traversed during
-# rule execution
-def proof_tree_str(traverse_list):
-    result = ""
+# Cleans up the traversal list, returning a new list in which each element has the form
+# e.g. [1, f(a,b), 6]
+def traverse_list_clean(traverse_list):
+    result = []
     lev = -1
+
     for i in traverse_list:
+
         # Increment/decrement indentation level based on traversal data
         lev += i[0]
+
         if i[0] == 1:
             # Indicate level by indentation
             spc = " " * lev * 2
             val = get_fcn_value_from_traversal_list(i[1], traverse_list)
+
             # Print the function name and its value, with the appropriate indentation
-            result += spc + i[1] + " = " + str(ToScalar(AsOf(Now, val))) + "\n"
+            result.append([lev, i[1], val])
+
     return result
 
 
-# def proof_tree_data(traverse_list):
-#     result = []
-#     lev = -1
-#
-#     for i in traverse_list:
-#
-#         # Increment/decrement indentation level based on traversal data
-#         lev += i[0]
-#         if i[0] == 1:
-#             # Indicate level by indentation
-#             spc = " " * lev * 2
-#             val = get_fcn_value_from_traversal_list(i[1], traverse_list)
-#
-#             # Print the function name and its value, with the appropriate indentation
-#             result.append(spc + i[1] + " = " + str(ToScalar(AsOf(Now, val))))
-#
-#     return result
+# Create an adjacency list of function calls, from a traversal list
+# Items in the resulting list are of the form: [1, 'f(1, 6)', 'g(1)', '6.35']
+def proof_tree_data(t_list):
+    t_clean = traverse_list_clean(t_list)
+    first = t_clean[0]
+    parents = [first[1]]
+    last_lev = 0
+    results = [[first[0], -1, first[1], first[2]]]
+
+    for i in t_clean[1:]:
+
+        lev = i[0]
+
+        # Going back up the tree
+        if lev < last_lev:
+            for m in range(last_lev-lev):
+                parents.pop()
+
+        # Going down the tree
+        elif lev > last_lev:
+            parents.append(i[1])
+
+        results.append([lev, parents[-2], i[1], i[2]])
+
+        last_lev = lev
+
+    # Remove duplicates
+    deduped = []
+    for i in results:
+        if i not in deduped:
+            deduped.append(i)
+
+    return deduped
+
+
+# Generates a proof tree, or explanation for a conclusion, from a list of the functions traversed during
+# rule execution
+def proof_tree_str(t_list):
+
+    adj_list = proof_tree_data(t_list)
+
+    result = ""
+
+    for i in adj_list:
+
+        # Indicate level by indentation
+        spc = " " * i[0] * 2
+
+        # Print the function name and its value, with the appropriate indentation
+        result += spc + i[2] + " = " + str(ToScalar(AsOf(Now, i[3]))) + "\n"
+
+    return result
